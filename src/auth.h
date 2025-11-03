@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#define TOKEN_DIR ".config/findSpot"
+#define TOKEN_DIR ".config/spotCLI"
 #define TOKEN_FILENAME "token.json"
 
 typedef struct {

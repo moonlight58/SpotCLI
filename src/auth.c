@@ -137,7 +137,7 @@ bool spotify_authorize(SpotifyToken *token) {
         return false;
     }
 
-    printf("Open this URL in your browser to authorize findSpot:\n");
+    printf("Open this URL in your browser to authorize spotCLI:\n");
     printf("https://accounts.spotify.com/authorize?client_id=%s&response_type=code&redirect_uri=%s"
             "&scope=user-library-read user-library-modify\n\n", client_id, redirect_uri);
 

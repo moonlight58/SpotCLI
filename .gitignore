@@ -2,7 +2,7 @@
 build/
 *.o
 *.d
-findSpot
+spotCLI
 
 .env
 

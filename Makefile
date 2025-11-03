@@ -9,7 +9,7 @@ BUILD_DIR = build
 BIN_DIR = .
 
 # Target executable
-TARGET = $(BIN_DIR)/findSpot
+TARGET = $(BIN_DIR)/spotCLI
 
 # Source files
 SOURCES = $(wildcard $(SRC_DIR)/*.c)
@@ -59,29 +59,29 @@ rebuild: clean all
 # Run the program in interactive mode
 .PHONY: run
 run: $(TARGET)
-	@echo "$(COLOR_BLUE)Running findSpot...$(COLOR_RESET)"
+	@echo "$(COLOR_BLUE)Running spotCLI...$(COLOR_RESET)"
 	@./$(TARGET) -i
 
 # Install to system (requires sudo)
 .PHONY: install
 install: $(TARGET)
-	@echo "$(COLOR_BLUE)Installing findSpot to /usr/local/bin...$(COLOR_RESET)"
-	@sudo cp $(TARGET) /usr/local/bin/findSpot
-	@sudo chmod +x /usr/local/bin/findSpot
+	@echo "$(COLOR_BLUE)Installing spotCLI to /usr/local/bin...$(COLOR_RESET)"
+	@sudo cp $(TARGET) /usr/local/bin/spotCLI
+	@sudo chmod +x /usr/local/bin/spotCLI
 	@echo "$(COLOR_GREEN)✓ Installation complete!$(COLOR_RESET)"
 
 # Uninstall from system
 .PHONY: uninstall
 uninstall:
-	@echo "$(COLOR_YELLOW)Uninstalling findSpot...$(COLOR_RESET)"
-	@sudo rm -f /usr/local/bin/findSpot
+	@echo "$(COLOR_YELLOW)Uninstalling spotCLI...$(COLOR_RESET)"
+	@sudo rm -f /usr/local/bin/spotCLI
 	@echo "$(COLOR_GREEN)✓ Uninstall complete!$(COLOR_RESET)"
 
 # Remove authentication token
 .PHONY: logout
 logout:
 	@echo "$(COLOR_YELLOW)Removing authentication token...$(COLOR_RESET)"
-	@rm -f ~/.config/findSpot/token.json
+	@rm -f ~/.config/spotCLI/token.json
 	@echo "$(COLOR_GREEN)✓ Logged out!$(COLOR_RESET)"
 
 # Debug build with symbols
@@ -93,7 +93,7 @@ debug: clean $(TARGET)
 # Show help
 .PHONY: help
 help:
-	@echo "$(COLOR_BLUE)findSpot Makefile Commands:$(COLOR_RESET)"
+	@echo "$(COLOR_BLUE)spotCLI Makefile Commands:$(COLOR_RESET)"
 	@echo ""
 	@echo "  $(COLOR_GREEN)make$(COLOR_RESET)          - Build the project"
 	@echo "  $(COLOR_GREEN)make clean$(COLOR_RESET)    - Remove build files"

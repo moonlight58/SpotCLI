@@ -1,4 +1,4 @@
-# findSpot
+# spotCLI
 
 A lightweight CLI tool to search Spotify music and add tracks to your liked songs without opening the Spotify app or website.
 
@@ -39,8 +39,8 @@ brew install curl json-c
 
 ```bash
 # Clone or download the repository
-git clone https://github.com/yourusername/findSpot.git
-cd findSpot
+git clone https://github.com/yourusername/spotCLI.git
+cd spotCLI
 
 # Build using Make
 make
@@ -51,8 +51,8 @@ sudo make install
 
 Or build manually:
 ```bash
-gcc src/*.c -o findSpot -lcurl -ljson-c
-sudo mv findSpot /usr/local/bin/
+gcc src/*.c -o spotCLI -lcurl -ljson-c
+sudo mv spotCLI /usr/local/bin/
 ```
 
 ## Setup
@@ -62,7 +62,7 @@ sudo mv findSpot /usr/local/bin/
 1. Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
 2. Click "Create app"
 3. Fill in the details:
-   - **App name**: findSpot (or any name you like)
+   - **App name**: spotCLI (or any name you like)
    - **App description**: CLI music search tool
    - **Redirect URI**: `http://localhost:8888/callback`
 4. Save your app and note the **Client ID** and **Client Secret**
@@ -84,23 +84,23 @@ EOF
 ### 3. First Run
 
 ```bash
-./findSpot
+./spotCLI
 ```
 
 The app will:
 1. Display an authorization URL
 2. Open a temporary local server on port 8888
 3. Wait for you to authorize the app in your browser
-4. Automatically save your tokens to `~/.config/findSpot/token.json`
+4. Automatically save your tokens to `~/.config/spotCLI/token.json`
 
 ## Usage
 
 ### Interactive Mode (default)
 
 ```bash
-findSpot
+spotCLI
 # or
-findSpot -i
+spotCLI -i
 ```
 
 Menu options:
@@ -112,16 +112,16 @@ Menu options:
 
 #### Search for tracks
 ```bash
-findSpot "PTSMR"
-findSpot "Bohemian Rhapsody"
-findSpot "tyler, the creator EARFQUAKE"
+spotCLI "PTSMR"
+spotCLI "Bohemian Rhapsody"
+spotCLI "tyler, the creator EARFQUAKE"
 ```
 
 #### List saved tracks
 ```bash
-findSpot --list
+spotCLI --list
 # or
-findSpot -l
+spotCLI -l
 ```
 
 ## Make Commands
@@ -156,22 +156,22 @@ make help     # Show all available commands
 
 ```bash
 # Search for a track and save it
-findSpot "Glimpse of Us"
+spotCLI "Glimpse of Us"
 
 # Search with artist name
-findSpot "Daft Punk Get Lucky"
+spotCLI "Daft Punk Get Lucky"
 
 # View your library (first 20 tracks)
-findSpot --list
+spotCLI --list
 
 # Interactive menu
-findSpot -i
+spotCLI -i
 ```
 
 ## Project Structure
 
 ```
-findSpot/
+spotCLI/
 ├── src/
 │   ├── api.c              # Spotify API calls
 │   ├── api.h
@@ -190,7 +190,7 @@ findSpot/
 ## Configuration Files
 
 ```
-~/.config/findSpot/
+~/.config/spotCLI/
 └── token.json  # Stored authentication tokens (auto-generated)
 ```
 
@@ -198,7 +198,7 @@ To log out and clear tokens:
 ```bash
 make logout
 # or manually
-rm ~/.config/findSpot/token.json
+rm ~/.config/spotCLI/token.json
 ```
 
 ## Troubleshooting
@@ -207,13 +207,13 @@ rm ~/.config/findSpot/token.json
 
 1. Check your token is valid:
    ```bash
-   cat ~/.config/findSpot/token.json
+   cat ~/.config/spotCLI/token.json
    ```
 
 2. Delete token and re-authenticate:
    ```bash
    make logout
-   ./findSpot
+   ./spotCLI
    ```
 
 3. Verify your `.env` file has correct credentials

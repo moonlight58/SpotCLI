@@ -26,7 +26,7 @@ void print_usage(const char *prog_name) {
 }
 
 void print_menu() {
-    printf("\n=== findSpot - Spotify CLI ===\n");
+    printf("\n=== spotCLI - Spotify CLI ===\n");
     printf("1. Search for tracks\n");
     printf("2. View saved tracks\n");
     printf("3. Exit\n");
