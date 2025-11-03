@@ -1,0 +1,179 @@
+#include "auth.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <curl/curl.h>
+#include <json-c/json.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+// Get full path to token file
+char* get_token_path() {
+    static char path[512];
+    const char *home = getenv("HOME");
+    if (!home) home = getenv("USERPROFILE"); // Windows fallback
+    if (!home) return NULL;
+    
+    snprintf(path, sizeof(path), "%s/%s/%s", home, TOKEN_DIR, TOKEN_FILENAME);
+    return path;
+}
+
+// Create token directory if it doesn't exist
+static void ensure_token_dir() {
+    const char *home = getenv("HOME");
+    if (!home) return;
+    
+    char dir_path[512];
+    snprintf(dir_path, sizeof(dir_path), "%s/%s", home, TOKEN_DIR);
+    mkdir(dir_path, 0700);
+}
+
+static size_t write_callback(void *ptr, size_t size, size_t nmemb, void *stream) {
+    size_t realsize = size * nmemb;
+    strncat((char *)stream, ptr, realsize);
+    return realsize;
+}
+
+bool spotify_is_authenticated() {
+    char *token_path = get_token_path();
+    if (!token_path) return false;
+    
+    FILE *f = fopen(token_path, "r");
+    if (!f) return false;
+    fclose(f);
+    return true;
+}
+
+bool spotify_save_token(SpotifyToken *token) {
+    ensure_token_dir();
+    char *token_path = get_token_path();
+    if (!token_path) return false;
+    
+    FILE *f = fopen(token_path, "w");
+    if (!f) return false;
+    fprintf(f, "{ \"access_token\": \"%s\", \"refresh_token\": \"%s\", \"expires_in\": %ld }",
+            token->access_token, token->refresh_token, token->expires_in);
+    fclose(f);
+    return true;
+}
+
+bool spotify_load_token(SpotifyToken *token) {
+    char *token_path = get_token_path();
+    if (!token_path) return false;
+    
+    FILE *f = fopen(token_path, "r");
+    if (!f) return false;
+
+    struct json_object *parsed = json_object_from_file(token_path);
+    if (!parsed) {
+        fclose(f);
+        return false;
+    }
+
+    strcpy(token->access_token, json_object_get_string(json_object_object_get(parsed, "access_token")));
+    strcpy(token->refresh_token, json_object_get_string(json_object_object_get(parsed, "refresh_token")));
+    token->expires_in = json_object_get_int64(json_object_object_get(parsed, "expires_in"));
+
+    json_object_put(parsed);
+    fclose(f);
+    return true;
+}
+
+bool spotify_refresh_token(SpotifyToken *token) {
+    CURL *curl = curl_easy_init();
+    if (!curl) return false;
+
+    char post_data[1024];
+    sprintf(post_data,
+            "grant_type=refresh_token&refresh_token=%s&client_id=%s&client_secret=%s",
+            token->refresh_token, CLIENT_ID, CLIENT_SECRET);
+
+    char response[4096] = {0};
+
+    curl_easy_setopt(curl, CURLOPT_URL, "https://accounts.spotify.com/api/token");
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_data);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, response);
+
+    CURLcode res = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
+    if (res != CURLE_OK) return false;
+
+    struct json_object *json = json_tokener_parse(response);
+    strcpy(token->access_token, json_object_get_string(json_object_object_get(json, "access_token")));
+    token->expires_in = json_object_get_int64(json_object_object_get(json, "expires_in"));
+    json_object_put(json);
+
+    spotify_save_token(token);
+    return true;
+}
+
+char* start_callback_server(int port, char *code_buffer, size_t buffer_size);
+
+bool spotify_authorize(SpotifyToken *token) {
+    printf("Open this URL in your browser to authorize findSpot:\n");
+    printf("https://accounts.spotify.com/authorize?client_id=%s&response_type=code&redirect_uri=%s"
+            "&scope=user-library-read user-library-modify\n\n", CLIENT_ID, REDIRECT_URI);
+
+    char auth_code[512];
+    if (!start_callback_server(8888, auth_code, sizeof(auth_code))) {
+        fprintf(stderr, "Failed to start callback server\n");
+        return false;
+    }
+
+    printf("✓ Authorization code received: %s\n\n", auth_code);
+
+    CURL *curl = curl_easy_init();
+    if (!curl) return false;
+
+    char post_data[1024];
+    sprintf(post_data,
+            "grant_type=authorization_code&code=%s&redirect_uri=%s&client_id=%s&client_secret=%s",
+            auth_code, REDIRECT_URI, CLIENT_ID, CLIENT_SECRET);
+    
+    char response[4096] = {0};
+    curl_easy_setopt(curl, CURLOPT_URL, "https://accounts.spotify.com/api/token");
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_data);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, response);
+
+    CURLcode res = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
+
+    if (res != CURLE_OK) return false;
+
+    struct json_object *json = json_tokener_parse(response);
+    if (!json) {
+        fprintf(stderr, "❌ Failed to parse JSON.\n");
+        return false;
+    }
+
+    struct json_object *access = NULL, *refresh = NULL, *expires = NULL;
+    json_object_object_get_ex(json, "access_token", &access);
+    json_object_object_get_ex(json, "refresh_token", &refresh);
+    json_object_object_get_ex(json, "expires_in", &expires);
+
+    if (!access || !refresh || !expires) {
+        fprintf(stderr, "❌ Missing token fields in response.\n");
+        json_object_put(json);
+        return false;
+    }
+
+    strcpy(token->access_token, json_object_get_string(access));
+    strcpy(token->refresh_token, json_object_get_string(refresh));
+    token->expires_in = json_object_get_int64(expires);
+
+    json_object_put(json);
+
+    spotify_save_token(token);
+    printf("✅ Authorization successful! Tokens saved.\n");
+    return true;
+}
+
+bool spotify_get_access_token(SpotifyToken *token) {
+    if (!spotify_load_token(token)) {
+        printf("No token found, starting authorization...\n");
+        return spotify_authorize(token);
+    }
+    return true;
+}
