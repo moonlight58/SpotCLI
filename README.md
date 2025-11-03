@@ -64,7 +64,7 @@ sudo mv spotCLI /usr/local/bin/
 3. Fill in the details:
    - **App name**: spotCLI (or any name you like)
    - **App description**: CLI music search tool
-   - **Redirect URI**: `http://localhost:8888/callback`
+   - **Redirect URI**: `http://127.0.0.1:8888/callback` since the webAPI doesn't support localhost anymore
 4. Save your app and note the **Client ID** and **Client Secret**
 
 ### 2. Configure Environment Variables
