@@ -6,6 +6,7 @@
 #include <json-c/json.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include "dotenv.h"
 
 // Get full path to token file
 char* get_token_path() {
@@ -83,10 +84,20 @@ bool spotify_refresh_token(SpotifyToken *token) {
     CURL *curl = curl_easy_init();
     if (!curl) return false;
 
+    // Get credentials from environment
+    const char *client_id = getenv("CLIENT_ID");
+    const char *client_secret = getenv("CLIENT_SECRET");
+    
+    if (!client_id || !client_secret) {
+        fprintf(stderr, "Error: CLIENT_ID or CLIENT_SECRET not set in environment\n");
+        curl_easy_cleanup(curl);
+        return false;
+    }
+
     char post_data[1024];
     sprintf(post_data,
             "grant_type=refresh_token&refresh_token=%s&client_id=%s&client_secret=%s",
-            token->refresh_token, CLIENT_ID, CLIENT_SECRET);
+            token->refresh_token, client_id, client_secret);
 
     char response[4096] = {0};
 
@@ -111,9 +122,24 @@ bool spotify_refresh_token(SpotifyToken *token) {
 char* start_callback_server(int port, char *code_buffer, size_t buffer_size);
 
 bool spotify_authorize(SpotifyToken *token) {
+    
+    if (!load_dotenv(".env")) {
+        fprintf(stderr, "Erreur : impossible de charger le fichier .env\n");
+        return false;
+    }
+
+    const char *client_id = getenv("CLIENT_ID");
+    const char *client_secret = getenv("CLIENT_SECRET");
+    const char *redirect_uri = getenv("REDIRECT_URI");
+
+    if (!client_id || !client_secret || !redirect_uri) {
+        fprintf(stderr, "Error: Missing environment variables (CLIENT_ID, CLIENT_SECRET, or REDIRECT_URI)\n");
+        return false;
+    }
+
     printf("Open this URL in your browser to authorize findSpot:\n");
     printf("https://accounts.spotify.com/authorize?client_id=%s&response_type=code&redirect_uri=%s"
-            "&scope=user-library-read user-library-modify\n\n", CLIENT_ID, REDIRECT_URI);
+            "&scope=user-library-read user-library-modify\n\n", client_id, redirect_uri);
 
     char auth_code[512];
     if (!start_callback_server(8888, auth_code, sizeof(auth_code))) {
@@ -129,7 +155,7 @@ bool spotify_authorize(SpotifyToken *token) {
     char post_data[1024];
     sprintf(post_data,
             "grant_type=authorization_code&code=%s&redirect_uri=%s&client_id=%s&client_secret=%s",
-            auth_code, REDIRECT_URI, CLIENT_ID, CLIENT_SECRET);
+            auth_code, redirect_uri, client_id, client_secret);
     
     char response[4096] = {0};
     curl_easy_setopt(curl, CURLOPT_URL, "https://accounts.spotify.com/api/token");

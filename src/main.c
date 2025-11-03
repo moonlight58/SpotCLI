@@ -1,5 +1,6 @@
 #include "auth.h"
 #include "api.h"
+#include "dotenv.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -129,6 +130,10 @@ void interactive_mode(SpotifyToken *token) {
 }
 
 int main(int argc, char *argv[]) {
+
+    // Load environment variables from .env file
+    load_dotenv(".env");
+
     SpotifyToken token;
     
     // Authenticate first

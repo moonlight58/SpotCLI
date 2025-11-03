@@ -2,10 +2,8 @@
 #define AUTH_H
 
 #include <stdbool.h>
+#include <stdlib.h>
 
-#define CLIENT_ID "your_client_id"
-#define CLIENT_SECRET "your_client_secret"
-#define REDIRECT_URI "http://127.0.0.1:8888/callback"
 #define TOKEN_DIR ".config/findSpot"
 #define TOKEN_FILENAME "token.json"
 
