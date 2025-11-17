@@ -110,3 +110,71 @@ bool spotify_api_put(SpotifyToken *token, const char *url, const char *json_data
     
     return (res == CURLE_OK && response_code == 200);
 }
+
+/**
+ * Performs a PUT request to Spotify API (without body)
+ * Returns true if response code is 204 (No Content)
+ */
+bool spotify_api_put_empty(SpotifyToken *token, const char *url) {
+    CURL *curl = curl_easy_init();
+    if (!curl) return false;
+    
+    char auth_header[1024];
+    snprintf(auth_header, sizeof(auth_header), "Authorization: Bearer %s", token->access_token);
+    
+    struct curl_slist *headers = NULL;
+    headers = curl_slist_append(headers, auth_header);
+    headers = curl_slist_append(headers, "Content-Length: 0");
+    
+    curl_easy_setopt(curl, CURLOPT_URL, url);
+    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    
+    CURLcode res = curl_easy_perform(curl);
+    
+    long response_code;
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+    
+    curl_slist_free_all(headers);
+    curl_easy_cleanup(curl);
+    
+    // Spotify returns 204 No Content on success
+    return (res == CURLE_OK && response_code == 204);
+}
+
+/**
+ * Performs a POST request to Spotify API
+ * Returns true if response code is 204 (No Content)
+ */
+bool spotify_api_post(SpotifyToken *token, const char *url, const char *json_data) {
+    CURL *curl = curl_easy_init();
+    if (!curl) return false;
+    
+    char auth_header[1024];
+    snprintf(auth_header, sizeof(auth_header), "Authorization: Bearer %s", token->access_token);
+    
+    struct curl_slist *headers = NULL;
+    headers = curl_slist_append(headers, auth_header);
+    headers = curl_slist_append(headers, "Content-Type: application/json");
+    
+    curl_easy_setopt(curl, CURLOPT_URL, url);
+    curl_easy_setopt(curl, CURLOPT_POST, 1L);
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    
+    if (json_data && strlen(json_data) > 0) {
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json_data);
+    } else {
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 0L);
+    }
+    
+    CURLcode res = curl_easy_perform(curl);
+    
+    long response_code;
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+    
+    curl_slist_free_all(headers);
+    curl_easy_cleanup(curl);
+    
+    // Spotify returns 204 No Content on success
+    return (res == CURLE_OK && response_code == 204);
+}

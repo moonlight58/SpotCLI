@@ -348,3 +348,147 @@ SpotifyPlayerState* spotify_get_player_state(SpotifyToken *token) {
     
     return state;
 }
+
+/**
+ * Pause playback on the user's active device
+ * 
+ * @param token - Valid Spotify token
+ * @param device_id - Optional: specific device ID (NULL for current active device)
+ * @return true if successful, false otherwise
+ */
+bool spotify_pause_playback(SpotifyToken *token, const char *device_id) {
+    char url[256];
+    
+    if (device_id) {
+        snprintf(url, sizeof(url), 
+                 "https://api.spotify.com/v1/me/player/pause?device_id=%s", 
+                 device_id);
+    } else {
+        snprintf(url, sizeof(url), "https://api.spotify.com/v1/me/player/pause");
+    }
+    
+    return spotify_api_put_empty(token, url);
+}
+
+/**
+ * Resume playback on the user's active device
+ * 
+ * @param token - Valid Spotify token
+ * @param device_id - Optional: specific device ID (NULL for current active device)
+ * @return true if successful, false otherwise
+ */
+bool spotify_resume_playback(SpotifyToken *token, const char *device_id) {
+    char url[256];
+    
+    if (device_id) {
+        snprintf(url, sizeof(url), 
+                 "https://api.spotify.com/v1/me/player/play?device_id=%s", 
+                 device_id);
+    } else {
+        snprintf(url, sizeof(url), "https://api.spotify.com/v1/me/player/play");
+    }
+    
+    return spotify_api_post(token, url, NULL);
+}
+
+/**
+ * Start/Resume playback with specific context or tracks
+ * 
+ * @param token - Valid Spotify token
+ * @param device_id - Optional: specific device ID (NULL for current active device)
+ * @param context_uri - Optional: Spotify URI of context (playlist, album, artist)
+ * @param uris - Optional: Array of track URIs to play
+ * @param uri_count - Number of URIs in the array
+ * @return true if successful, false otherwise
+ * 
+ * Examples:
+ * - Play a playlist: context_uri = "spotify:playlist:37i9dQZF1DXcBWIGoYBM5M"
+ * - Play specific tracks: uris = {"spotify:track:4iV5W9uYEdYUVa79Axb7Rh", ...}
+ */
+bool spotify_start_playback(SpotifyToken *token, const char *device_id, 
+                            const char *context_uri, const char **uris, int uri_count) {
+    char url[256];
+    
+    if (device_id) {
+        snprintf(url, sizeof(url), 
+                 "https://api.spotify.com/v1/me/player/play?device_id=%s", 
+                 device_id);
+    } else {
+        snprintf(url, sizeof(url), "https://api.spotify.com/v1/me/player/play");
+    }
+    
+    // Build JSON body if context_uri or uris are provided
+    const char *json_str = NULL;
+    struct json_object *root = NULL;
+    
+    if (context_uri || (uris && uri_count > 0)) {
+        root = json_object_new_object();
+        
+        // Add context URI (playlist, album, artist)
+        if (context_uri) {
+            json_object_object_add(root, "context_uri", 
+                                  json_object_new_string(context_uri));
+        }
+        
+        // Add specific track URIs
+        if (uris && uri_count > 0) {
+            struct json_object *uris_array = json_object_new_array();
+            for (int i = 0; i < uri_count; i++) {
+                json_object_array_add(uris_array, json_object_new_string(uris[i]));
+            }
+            json_object_object_add(root, "uris", uris_array);
+        }
+        
+        json_str = json_object_to_json_string(root);
+    }
+    
+    bool result = spotify_api_post(token, url, json_str);
+    
+    if (root) {
+        json_object_put(root);
+    }
+    
+    return result;
+}
+
+/**
+ * Toggle between play and pause based on current state
+ */
+bool spotify_toggle_playback(SpotifyToken *token) {
+    SpotifyPlayerState *state = spotify_get_player_state(token);
+    if (!state) {
+        fprintf(stderr, "Cannot toggle: no active playback\n");
+        return false;
+    }
+    
+    bool result;
+    if (state->is_playing) {
+        printf("⏸ Pausing...\n");
+        result = spotify_pause_playback(token, NULL);
+    } else {
+        printf("▶ Resuming...\n");
+        result = spotify_resume_playback(token, NULL);
+    }
+    
+    spotify_free_player_state(state);
+    return result;
+}
+
+/**
+ * Allow to play multiples tracks like a queue tracks
+ */
+void play_multiple_tracks(SpotifyToken *token) {
+    const char *track_uris[] = {
+        "spotify:track:4iV5W9uYEdYUVa79Axb7Rh",  // Smells Like Teen Spirit
+        "spotify:track:3n3Ppam7vgaVa1iaRUc9Lp",  // Mr. Brightside
+        "spotify:track:7qiZfU4dY1lWllzX7mPBI6"   // Shape of You
+    };
+    
+    printf("🎵 Playing queue of %zu tracks...\n", sizeof(track_uris) / sizeof(track_uris[0]));
+    
+    if (spotify_start_playback(token, NULL, NULL, track_uris, 3)) {
+        printf("✓ Queue started successfully!\n");
+    } else {
+        printf("❌ Failed to start queue\n");
+    }
+}

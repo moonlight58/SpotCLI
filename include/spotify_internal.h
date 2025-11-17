@@ -54,4 +54,16 @@ void parse_device_json(struct json_object *device_obj, SpotifyDevice *device);
  */
 void parse_player_state_json(struct json_object *root, SpotifyPlayerState *state);
 
+/**
+ * Performs a PUT request to Spotify API (without body)
+ * Returns true if response code is 204 (No Content)
+ */
+bool spotify_api_put_empty(SpotifyToken *token, const char *url);
+
+/**
+ * Performs a POST request to Spotify API
+ * Returns true if response code is 204 (No Content)
+ */
+bool spotify_api_post(SpotifyToken *token, const char *url, const char *json_data);
+
 #endif // SPOTIFY_INTERNAL_H

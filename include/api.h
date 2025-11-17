@@ -154,4 +154,10 @@ void spotify_print_playlist(SpotifyPlaylist *playlist, int index);
 // Helper to print player's state
 void spotify_print_player_state(SpotifyPlayerState *state);
 
+// Control playback
+bool spotify_pause_playback(SpotifyToken *token, const char *device_id);
+bool spotify_resume_playback(SpotifyToken *token, const char *device_id);
+bool spotify_start_playback(SpotifyToken *token, const char *device_id, const char *context_uri, const char **uris, int uri_count);
+bool spotify_toggle_playback(SpotifyToken *token);
+
 #endif
