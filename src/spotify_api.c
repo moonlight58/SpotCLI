@@ -320,3 +320,31 @@ bool spotify_save_tracks(SpotifyToken *token, const char **track_ids, int count)
     json_object_put(root);
     return result;
 }
+
+SpotifyPlayerState* spotify_get_player_state(SpotifyToken *token) {
+    const char *url = "https://api.spotify.com/v1/me/player";
+    
+    struct json_object *root = spotify_api_get(token, url);
+    if (!root) {
+        fprintf(stderr, "Failed to get player state (no active device or API error)\n");
+        return NULL;
+    }
+    
+    // Check if response is empty (no active device)
+    if (json_object_get_type(root) == json_type_null) {
+        json_object_put(root);
+        fprintf(stderr, "No active playback device found\n");
+        return NULL;
+    }
+    
+    SpotifyPlayerState *state = malloc(sizeof(SpotifyPlayerState));
+    if (!state) {
+        json_object_put(root);
+        return NULL;
+    }
+    
+    parse_player_state_json(root, state);
+    json_object_put(root);
+    
+    return state;
+}

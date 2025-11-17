@@ -44,4 +44,14 @@ void parse_artist_json(struct json_object *item, SpotifyArtist *artist);
  */
 void parse_playlist_json(struct json_object *item, SpotifyPlaylist *playlist);
 
+/**
+ * Parse device data from JSON object into SpotifyDevice struct
+ */
+void parse_device_json(struct json_object *device_obj, SpotifyDevice *device);
+
+/**
+ * Parse player state from JSON object into SpotifyPlayerState struct
+ */
+void parse_player_state_json(struct json_object *root, SpotifyPlayerState *state);
+
 #endif // SPOTIFY_INTERNAL_H

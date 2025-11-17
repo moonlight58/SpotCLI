@@ -147,3 +147,143 @@ void parse_playlist_json(struct json_object *item, SpotifyPlaylist *playlist) {
         playlist->count_tracks = json_object_get_int(obj);
     }
 }
+
+/**
+ * Parse device data from JSON object into SpotifyDevice struct
+ */
+void parse_device_json(struct json_object *device_obj, SpotifyDevice *device) {
+    struct json_object *obj;
+    
+    memset(device, 0, sizeof(SpotifyDevice));
+    
+    if (json_object_object_get_ex(device_obj, "id", &obj)) {
+        const char *id = json_object_get_string(obj);
+        if (id) {
+            strncpy(device->device_id, id, sizeof(device->device_id) - 1);
+        }
+    }
+    
+    if (json_object_object_get_ex(device_obj, "name", &obj)) {
+        strncpy(device->device_name, json_object_get_string(obj), 
+                sizeof(device->device_name) - 1);
+    }
+    
+    if (json_object_object_get_ex(device_obj, "type", &obj)) {
+        strncpy(device->device_type, json_object_get_string(obj), 
+                sizeof(device->device_type) - 1);
+    }
+    
+    if (json_object_object_get_ex(device_obj, "volume_percent", &obj)) {
+        device->volume_percent = json_object_get_int(obj);
+    }
+    
+    if (json_object_object_get_ex(device_obj, "is_active", &obj)) {
+        device->is_active = json_object_get_boolean(obj);
+    }
+    
+    if (json_object_object_get_ex(device_obj, "is_private_session", &obj)) {
+        device->is_private_session = json_object_get_boolean(obj);
+    }
+    
+    if (json_object_object_get_ex(device_obj, "is_restricted", &obj)) {
+        device->is_restricted = json_object_get_boolean(obj);
+    }
+}
+
+/**
+ * Parse player state from JSON object into SpotifyPlayerState struct
+ */
+void parse_player_state_json(struct json_object *root, SpotifyPlayerState *state) {
+    struct json_object *obj;
+    
+    memset(state, 0, sizeof(SpotifyPlayerState));
+    
+    // Parse track item
+    struct json_object *item;
+    if (json_object_object_get_ex(root, "item", &item) && item) {
+        // Track ID
+        if (json_object_object_get_ex(item, "id", &obj)) {
+            strncpy(state->track_id, json_object_get_string(obj), 
+                    sizeof(state->track_id) - 1);
+        }
+        
+        // Track name
+        if (json_object_object_get_ex(item, "name", &obj)) {
+            strncpy(state->track_name, json_object_get_string(obj), 
+                    sizeof(state->track_name) - 1);
+        }
+        
+        // Artist name
+        struct json_object *artists;
+        if (json_object_object_get_ex(item, "artists", &artists) && 
+            json_object_array_length(artists) > 0) {
+            struct json_object *artist = json_object_array_get_idx(artists, 0);
+            if (json_object_object_get_ex(artist, "name", &obj)) {
+                strncpy(state->artist_name, json_object_get_string(obj), 
+                        sizeof(state->artist_name) - 1);
+            }
+        }
+        
+        // Album name
+        struct json_object *album;
+        if (json_object_object_get_ex(item, "album", &album) &&
+            json_object_object_get_ex(album, "name", &obj)) {
+            strncpy(state->album_name, json_object_get_string(obj), 
+                    sizeof(state->album_name) - 1);
+        }
+        
+        // Duration
+        if (json_object_object_get_ex(item, "duration_ms", &obj)) {
+            state->duration_ms = json_object_get_int(obj);
+        }
+        
+        // URI
+        if (json_object_object_get_ex(item, "uri", &obj)) {
+            strncpy(state->track_uri, json_object_get_string(obj), 
+                    sizeof(state->track_uri) - 1);
+        }
+    }
+    
+    // Playback state
+    if (json_object_object_get_ex(root, "is_playing", &obj)) {
+        state->is_playing = json_object_get_boolean(obj);
+    }
+    
+    if (json_object_object_get_ex(root, "progress_ms", &obj)) {
+        state->progress_ms = json_object_get_int(obj);
+    }
+    
+    if (json_object_object_get_ex(root, "timestamp", &obj)) {
+        state->timestamp = json_object_get_int(obj);
+    }
+    
+    // Context
+    struct json_object *context;
+    if (json_object_object_get_ex(root, "context", &context) && context) {
+        if (json_object_object_get_ex(context, "type", &obj)) {
+            strncpy(state->context_type, json_object_get_string(obj), 
+                    sizeof(state->context_type) - 1);
+        }
+        
+        if (json_object_object_get_ex(context, "uri", &obj)) {
+            strncpy(state->context_uri, json_object_get_string(obj), 
+                    sizeof(state->context_uri) - 1);
+        }
+    }
+    
+    // Settings
+    if (json_object_object_get_ex(root, "shuffle_state", &obj)) {
+        state->shuffle_state = json_object_get_boolean(obj);
+    }
+    
+    if (json_object_object_get_ex(root, "repeat_state", &obj)) {
+        strncpy(state->repeat_state, json_object_get_string(obj), 
+                sizeof(state->repeat_state) - 1);
+    }
+    
+    // Device
+    struct json_object *device;
+    if (json_object_object_get_ex(root, "device", &device)) {
+        parse_device_json(device, &state->device);
+    }
+}

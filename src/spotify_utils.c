@@ -27,6 +27,11 @@ void spotify_free_playlist_list(SpotifyPlaylistList *list) {
     free(list);
 }
 
+void spotify_free_player_state(SpotifyPlayerState *state) {
+    if (!state) return;
+    free(state);
+}
+
 void spotify_print_track(SpotifyTrack *track, int index) {
     printf("%d. %s\n", index, track->name);
     printf("   Artist: %s\n", track->artist);
@@ -58,4 +63,55 @@ void spotify_print_playlist(SpotifyPlaylist *playlist, int index) {
     printf("   Tracks: %d\n", playlist->count_tracks);
     printf("   Public: %s\n", playlist->is_public ? "Yes" : "No");
     printf("   ID: %s\n", playlist->id);
+}
+
+void spotify_print_player_state(SpotifyPlayerState *state) {
+    if (!state) {
+        printf("No playback state available\n");
+        return;
+    }
+    
+    printf("╔════════════════════════════════════════════════════════════════╗\n");
+    printf("║                      SPOTIFY PLAYER STATE                      ║\n");
+    printf("╠════════════════════════════════════════════════════════════════╣\n");
+    
+    // Track info
+    printf("║ Track: %s\n", state->track_name);
+    printf("║ Artist: %s\n", state->artist_name);
+    printf("║ Album: %s\n", state->album_name);
+    
+    // Progress
+    int progress_sec = state->progress_ms / 1000;
+    int duration_sec = state->duration_ms / 1000;
+    printf("║ Progress: %d:%02d / %d:%02d\n", 
+           progress_sec / 60, progress_sec % 60,
+           duration_sec / 60, duration_sec % 60);
+    
+    // Progress bar
+    int bar_width = 50;
+    int filled = (state->duration_ms > 0) ? 
+                 (state->progress_ms * bar_width / state->duration_ms) : 0;
+    printf("║ [");
+    for (int i = 0; i < bar_width; i++) {
+        printf(i < filled ? "#" : ".");
+    }
+    printf("]\n");
+    
+    // Playback state
+    printf("║ Status: %s\n", state->is_playing ? "▶ Playing" : "⏸ Paused");
+    printf("║ Shuffle: %s\n", state->shuffle_state ? "On" : "Off");
+    printf("║ Repeat: %s\n", state->repeat_state);
+    
+    // Context
+    if (strlen(state->context_type) > 0) {
+        printf("║ Context: %s\n", state->context_type);
+    }
+    
+    // Device info
+    printf("╠════════════════════════════════════════════════════════════════╣\n");
+    printf("║ Device: %s (%s)\n", state->device.device_name, state->device.device_type);
+    printf("║ Volume: %d%%\n", state->device.volume_percent);
+    printf("║ Active: %s\n", state->device.is_active ? "Yes" : "No");
+    
+    printf("╚════════════════════════════════════════════════════════════════╝\n");
 }

@@ -20,6 +20,7 @@ void print_usage(const char *prog_name) {
     printf("  -a, --artist      Search for artists\n");
     printf("  -A, --album       Search for albums\n");
     printf("  -p, --playlist    Search for playlists\n");
+    printf("  -P, --player      Display the current player state (current music played, time of the music, etc...)\n");
     printf("  -u, --user        Search for users\n");
     printf("  -b, --audiobook   Search for audiobooks\n");
     printf("  -l, --list        List your saved tracks\n");
@@ -398,6 +399,7 @@ int main(int argc, char *argv[]) {
     // Parse command line options
     int opt;
     int list_mode = 0;
+    int player_state = 0;
     int interactive = 0;
     char *search_type = "track";
 
@@ -406,6 +408,7 @@ int main(int argc, char *argv[]) {
         {"artist",      no_argument, 0, 'a'},
         {"album",       no_argument, 0, 'A'},
         {"playlist",    no_argument, 0, 'p'},
+        {"player",      no_argument, 0, 'P'},
         {"user",        no_argument, 0, 'u'},
         {"audiobook",   no_argument, 0, 'b'},
         {"list",        no_argument, 0, 'l'},
@@ -415,7 +418,7 @@ int main(int argc, char *argv[]) {
     };
 
     int option_index = 0;
-    while ((opt = getopt_long(argc, argv, "taApublih", long_options, &option_index)) != -1) {
+    while ((opt = getopt_long(argc, argv, "taApPublih", long_options, &option_index)) != -1) {
         switch (opt) {
             case 't':
                 search_type = "track";
@@ -428,6 +431,9 @@ int main(int argc, char *argv[]) {
                 break;
             case 'p':
                 search_type = "playlist";
+                break;
+            case 'P':
+                player_state = 1;
                 break;
             case 'u':
                 search_type = "user";
@@ -461,6 +467,13 @@ int main(int argc, char *argv[]) {
     // List mode
     if (list_mode) {
         view_saved_tracks(&token);
+        return 0;
+    }
+
+    if (player_state) {
+        SpotifyPlayerState *state = spotify_get_player_state(&token);
+        spotify_print_player_state(state);
+        spotify_free_player_state(state);
         return 0;
     }
 

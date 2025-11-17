@@ -13,7 +13,7 @@ typedef struct {
     char uri[128];
 } SpotifyTrack;
 
-typedef struct {
+typedef struct { // List of all the tracks
     SpotifyTrack *tracks;
     int count;
     int total;
@@ -29,7 +29,7 @@ typedef struct {
     char image_url[512];
 } SpotifyArtist;
 
-typedef struct {
+typedef struct { // List of all the artists
     SpotifyArtist *artists;
     int count;
     int total;
@@ -41,7 +41,7 @@ typedef struct {
     char artist[256];
 } SpotifyAlbum;
 
-typedef struct {
+typedef struct { // List of all the albums
     SpotifyAlbum *albums;
     int count;
     int total;
@@ -55,11 +55,47 @@ typedef struct {
     int count_tracks;
 } SpotifyPlaylist;
 
-typedef struct {
+typedef struct { // List of all the playlists
     SpotifyPlaylist* playlists;
     int count;
     int total;
 } SpotifyPlaylistList;
+
+typedef struct {
+    char device_id[64];
+    char device_name[256];
+    char device_type[64];  // "Computer", "Smartphone", "Speaker", etc.
+    int volume_percent;
+    bool is_active;
+    bool is_private_session;
+    bool is_restricted;
+} SpotifyDevice;
+
+typedef struct {
+    // Track info
+    char track_id[64];
+    char track_name[256];
+    char artist_name[256];
+    char album_name[256];
+    int duration_ms;
+    char track_uri[128];
+    
+    // Playback state
+    bool is_playing;
+    int progress_ms;
+    int timestamp;  // Unix timestamp
+    
+    // Context (playlist, album, etc.)
+    char context_type[32];  // "playlist", "album", "artist", etc.
+    char context_uri[128];
+    
+    // Settings
+    bool shuffle_state;
+    char repeat_state[16];  // "off", "track", "context"
+    
+    // Device
+    SpotifyDevice device;
+} SpotifyPlayerState;
 
 // Search for tracks
 SpotifyTrackList* spotify_search_tracks(SpotifyToken *token, const char *query, int limit);
@@ -85,6 +121,9 @@ SpotifyAlbumList* spotify_get_artist_albums(SpotifyToken *token, const char *art
 // Get user's playlists
 SpotifyPlaylistList* spotify_get_user_playlists(SpotifyToken *token, int limit, int offset);
 
+// Get player's state
+SpotifyPlayerState* spotify_get_player_state(SpotifyToken *token);
+
 // Free track list memory
 void spotify_free_track_list(SpotifyTrackList *list);
 
@@ -93,6 +132,9 @@ void spotify_free_artist_list(SpotifyArtistList *list);
 
 // Free album list memory
 void spotify_free_album_list(SpotifyAlbumList *list);
+
+// Free player state memory
+void spotify_free_player_state(SpotifyPlayerState *state);
 
 // Free user's playlist memory
 void spotify_free_playlist_list(SpotifyPlaylistList *list);
@@ -108,5 +150,8 @@ void spotify_print_album(SpotifyAlbum *album, int index);
 
 // Helper to print user's playlist info
 void spotify_print_playlist(SpotifyPlaylist *playlist, int index);
+
+// Helper to print player's state
+void spotify_print_player_state(SpotifyPlayerState *state);
 
 #endif
