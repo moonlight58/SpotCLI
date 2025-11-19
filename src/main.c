@@ -7,11 +7,62 @@
 #include <getopt.h>
 
 // ===== DÉCLARATIONS DE FONCTIONS =====
+void view_and_transfer_devices(SpotifyToken *token);
 void view_artist_top_tracks(SpotifyToken *token, const char *artist_id, const char *artist_name);
 void view_artist_albums(SpotifyToken *token, const char *artist_id, const char *artist_name);
 void view_users_playlists(SpotifyToken *token, int limit, int offset);
 void search_artist_and_view_top_tracks(SpotifyToken *token, const char *query);
 void search_artist_and_view_albums(SpotifyToken *token, const char *query);
+
+void view_and_transfer_devices(SpotifyToken *token) {
+    printf("\nFetching available devices...\n");
+
+    int device_count = 0;
+    SpotifyDevice *devices = spotify_get_available_devices(token, &device_count);
+
+    if (!devices || device_count == 0) {
+        printf("No devices found. Make sure Spotify is open on at least one device.\n");
+        if (devices) free(devices);
+        return;
+    }
+
+    printf("\nFound %d device(s):\n\n", device_count);
+
+    for (int i = 0; i < device_count; i++) {
+        spotify_print_device(&devices[i], i + 1);
+        printf("\n");
+    }
+
+    printf("Enter device number to transfer playback (or 0 to cancel): ");
+    int choice;
+    if (scanf("%d", &choice) != 1) {
+        printf("Invalid input.\n");
+        free(devices);
+        return;
+    }
+    getchar(); // consume newline
+
+    if (choice > 0 && choice <= device_count) {
+        const char *device_id = devices[choice - 1].device_id;
+        const char *device_name = devices[choice - 1].device_name;
+
+        printf("Transfer playback to '%s'? Start playing? (y/n): ", device_name);
+        char start_play;
+        scanf(" %c", &start_play);
+        getchar();
+
+        bool play = (start_play == 'y' || start_play == 'Y');
+
+        printf("Transferring playback to %s...\n", device_name);
+        if (spotify_transfer_playback(token, device_id, play)) {
+            printf("✅ Playback transferred successfully!\n");
+        } else {
+            printf("❌ Failed to transfer playback.\n");
+        }
+    }
+
+    free(devices);
+}
 
 void print_usage(const char *prog_name) {
     printf("Usage: %s [OPTIONS] \"search query\"\n\n", prog_name);

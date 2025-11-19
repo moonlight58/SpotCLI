@@ -125,6 +125,7 @@ void spotify_print_artist(SpotifyArtist *artist, int index);
 void spotify_print_album(SpotifyAlbum *album, int index);
 void spotify_print_playlist(SpotifyPlaylist *playlist, int index);
 void spotify_print_player_state(SpotifyPlayerState *state);
+void spotify_print_device(SpotifyDevice *device, int index);
 
 // Control playback (pause/resume/start/toggle)
 bool spotify_pause_playback(SpotifyToken *token, const char *device_id);
@@ -136,5 +137,25 @@ bool spotify_toggle_playback(SpotifyToken *token);
 bool spotify_skip_next_playback(SpotifyToken *token, const char *device_id);
 bool spotify_skip_previous_playback(SpotifyToken *token, const char *device_id);
 bool spotify_toggle_playback_shuffle(SpotifyToken *token, const char *device_id, bool state_shuffle);
+
+
+/**
+ * Transfer playback to a different device
+ * 
+ * @param token - Valid Spotify token
+ * @param device_id - Target device ID to transfer playback to
+ * @param play - If true, playback starts on new device; if false, keep current state
+ * @return true if successful, false otherwise
+ */
+bool spotify_transfer_playback(SpotifyToken *token, const char *device_id, bool play);
+
+/**
+ * Get list of available devices
+ * 
+ * @param token - Valid Spotify token
+ * @param device_count - Output parameter for number of devices found
+ * @return Array of SpotifyDevice or NULL on error (must be freed by caller)
+ */
+SpotifyDevice* spotify_get_available_devices(SpotifyToken *token, int *device_count);
 
 #endif

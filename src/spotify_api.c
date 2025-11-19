@@ -532,3 +532,81 @@ bool spotify_toggle_playback_repeat(SpotifyToken *token, const char *device_id) 
     context_index++;
     return spotify_api_put_empty(token, url);
 }
+
+/**
+ * Transfer playback to a different device
+ */
+bool spotify_transfer_playback(SpotifyToken *token, const char *device_id, bool play) {
+    if (!token || !device_id) {
+        fprintf(stderr, "Invalid parameters for transfer_playback\n");
+        return false;
+    }
+
+    const char *url = "https://api.spotify.com/v1/me/player";
+
+    // Build JSON body
+    struct json_object *root = json_object_new_object();
+    struct json_object *device_ids = json_object_new_array();
+    
+    json_object_array_add(device_ids, json_object_new_string(device_id));
+    json_object_object_add(root, "device_ids", device_ids);
+    json_object_object_add(root, "play", json_object_new_boolean(play));
+
+    const char *json_str = json_object_to_json_string(root);
+
+    bool result = spotify_api_put(token, url, json_str);
+
+    json_object_put(root);
+    return result;
+}
+
+/**
+ * Get list of available devices
+ */
+SpotifyDevice* spotify_get_available_devices(SpotifyToken *token, int *device_count) {
+    if (!token || !device_count) {
+        fprintf(stderr, "Invalid parameters for get_available_devices\n");
+        return NULL;
+    }
+
+    *device_count = 0;
+
+    const char *url = "https://api.spotify.com/v1/me/player/devices";
+
+    struct json_object *root = spotify_api_get(token, url);
+    if (!root) {
+        fprintf(stderr, "Failed to get devices\n");
+        return NULL;
+    }
+
+    struct json_object *devices_array;
+    if (!json_object_object_get_ex(root, "devices", &devices_array)) {
+        fprintf(stderr, "No 'devices' field in response\n");
+        json_object_put(root);
+        return NULL;
+    }
+
+    int count = json_object_array_length(devices_array);
+    if (count == 0) {
+        fprintf(stderr, "No devices found\n");
+        json_object_put(root);
+        return NULL;
+    }
+
+    SpotifyDevice *devices = malloc(sizeof(SpotifyDevice) * count);
+    if (!devices) {
+        fprintf(stderr, "Failed to allocate memory for devices\n");
+        json_object_put(root);
+        return NULL;
+    }
+
+    for (int i = 0; i < count; i++) {
+        struct json_object *device_obj = json_object_array_get_idx(devices_array, i);
+        parse_device_json(device_obj, &devices[i]);
+    }
+
+    *device_count = count;
+    json_object_put(root);
+
+    return devices;
+}

@@ -115,3 +115,11 @@ void spotify_print_player_state(SpotifyPlayerState *state) {
     
     printf("╚════════════════════════════════════════════════════════════════╝\n");
 }
+
+void spotify_print_device(SpotifyDevice *device, int index) {
+    printf("%d. %s\n", index, device->device_name);
+    printf("   Type: %s\n", device->device_type);
+    printf("   Volume: %d%%\n", device->volume_percent);
+    printf("   Active: %s\n", device->is_active ? "✓ Yes" : "No");
+    printf("   ID: %s\n", device->device_id);
+}
