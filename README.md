@@ -248,17 +248,16 @@ The app requests the following Spotify scopes:
 - [x] Album search
 - [ ] Playlist management
 - [ ] Player functionnality
-  - [ ] Audio preview
+  - [x] Audio preview
   - [x] Start/Resume
   - [x] Pause
   - [x] Toggle Shuffle
   - [x] Skip to Next/Previous
   - [ ] Set Playback Volume
   - [ ] User's Queue Tracks
-  - [ ] Change playback device
+  - [x] Change playback device
 - [ ] Create custom playlists
 - [ ] Remove tracks from library
-- [ ] Search filters (year, genre, popularity)
 - [ ] Batch operations
 - [ ] Configuration file for preferences
 - [ ] Shell completions (bash/zsh/fish)
