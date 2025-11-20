@@ -158,4 +158,5 @@ bool spotify_transfer_playback(SpotifyToken *token, const char *device_id, bool 
  */
 SpotifyDevice* spotify_get_available_devices(SpotifyToken *token, int *device_count);
 
+bool spotify_set_playback_volume(SpotifyToken *token, const char *device_id, int volume);
 #endif

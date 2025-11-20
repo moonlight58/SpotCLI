@@ -547,7 +547,7 @@ bool spotify_transfer_playback(SpotifyToken *token, const char *device_id, bool 
     // Build JSON body
     struct json_object *root = json_object_new_object();
     struct json_object *device_ids = json_object_new_array();
-    
+
     json_object_array_add(device_ids, json_object_new_string(device_id));
     json_object_object_add(root, "device_ids", device_ids);
     json_object_object_add(root, "play", json_object_new_boolean(play));
@@ -609,4 +609,16 @@ SpotifyDevice* spotify_get_available_devices(SpotifyToken *token, int *device_co
     json_object_put(root);
 
     return devices;
+}
+
+bool spotify_set_playback_volume(SpotifyToken *token, const char *device_id, int volume) {
+    char url[256];
+
+    if (device_id && volume) {
+        snprintf(url, sizeof(url),
+                "https://api.spotify.com/v1/me/player/volume?volume_percent=%d&device_id=%s",
+                volume, device_id);
+    } else {
+    }
+    return spotify_api_put_empty(token, url);
 }

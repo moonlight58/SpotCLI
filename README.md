@@ -174,14 +174,24 @@ spotCLI -i
 
 ```
 spotCLI/
+├── include/
+│   ├── api.h
+│   ├── auth.h
+│   ├── dotenv.h
+│   ├── spotify_api.h 
+│   ├── spotify_http.h
+│   ├── spotify_internal.h
+│   ├── spotify_parsers.h 
+│   └── spotify_utils.h
 ├── src/
 │   ├── api.c              # Spotify API calls
-│   ├── api.h
 │   ├── auth.c             # OAuth authentication
-│   ├── auth.h
 │   ├── callback_server.c  # Local HTTP server for OAuth callback
 │   ├── dotenv.c           # Environment variable loader
-│   ├── dotenv.h
+│   ├── spotify_api.c 
+│   ├── spotify_http.c
+│   ├── spotify_parsers.c
+│   ├── spotify_utils.c
 │   └── main.c             # Main program and CLI interface
 ├── Makefile
 ├── .env                   # Your credentials (not in git!)
@@ -240,6 +250,10 @@ pkg-config --libs libcurl json-c
 The app requests the following Spotify scopes:
 - `user-library-read` - View your saved tracks
 - `user-library-modify` - Save tracks to your library
+- `playlist-modify-public`
+- `playlist-modify-private`
+- `user-read-playback-state`
+- `user-modify-playback-state`
 
 ## Roadmap
 
@@ -253,7 +267,7 @@ The app requests the following Spotify scopes:
   - [x] Pause
   - [x] Toggle Shuffle
   - [x] Skip to Next/Previous
-  - [ ] Set Playback Volume
+  - [x] Set Playback Volume
   - [ ] User's Queue Tracks
   - [x] Change playback device
 - [ ] Create custom playlists
