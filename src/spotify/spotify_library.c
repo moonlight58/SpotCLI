@@ -1,4 +1,6 @@
-#include "spotify_library.h"
+#include "api.h"
+#include "spotify/spotify_library.h"
+#include <stdio.h>
 
 SpotifyTrackList* spotify_get_saved_tracks(SpotifyToken *token, int limit, int offset) {
     char url[256];

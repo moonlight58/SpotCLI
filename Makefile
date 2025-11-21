@@ -11,9 +11,11 @@ BIN_DIR = .
 # Target executable
 TARGET = $(BIN_DIR)/spotCLI
 
-# Source files
-SOURCES = $(wildcard $(SRC_DIR)/*.c)
-OBJECTS = $(SOURCES:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
+# Find all source files recursively
+SOURCES = $(shell find $(SRC_DIR) -type f -name '*.c')
+# Convert source paths to object paths in build directory
+OBJECTS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SOURCES))
+# Dependency files
 DEPS = $(OBJECTS:.o=.d)
 
 # Colors for output
@@ -27,21 +29,18 @@ COLOR_BLUE = \033[38;2;43;123;251m
 all: $(TARGET)
 	@echo "$(COLOR_GREEN)✓ Build complete!$(COLOR_RESET)"
 
-# Create build directory
-$(BUILD_DIR):
-	@mkdir -p $(BUILD_DIR)
-
-# Link object files to create executable
-$(TARGET): $(OBJECTS)
-	@echo "$(COLOR_BLUE)Linking $(TARGET)...$(COLOR_RESET)"
-	@$(CC) $(OBJECTS) -o $(TARGET) $(LDFLAGS)
-
-# Compile source files to object files
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
+# Ensure build directories exist
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
+	@mkdir -p $(dir $@)
 	@echo "$(COLOR_YELLOW)Compiling $<...$(COLOR_RESET)"
 	@$(CC) $(CFLAGS) -MMD -MP -c $< -o $@
 
-# Include dependency files
+# Link objects
+$(TARGET): $(OBJECTS)
+	@echo "$(COLOR_BLUE)Linking $(TARGET)...$(COLOR_RESET)"
+	@$(CC) $(OBJECTS) -o $@ $(LDFLAGS)
+
+# Include dependency files (if they exist)
 -include $(DEPS)
 
 # Clean build artifacts
@@ -56,7 +55,7 @@ clean:
 .PHONY: rebuild
 rebuild: clean all
 
-# Run the program in interactive mode
+# Run the program
 .PHONY: run
 run: $(TARGET)
 	@echo "$(COLOR_BLUE)Running spotCLI...$(COLOR_RESET)"
@@ -70,14 +69,14 @@ install: $(TARGET)
 	@sudo chmod +x /usr/local/bin/spotCLI
 	@echo "$(COLOR_GREEN)✓ Installation complete!$(COLOR_RESET)"
 
-# Uninstall from system
+# Uninstall
 .PHONY: uninstall
 uninstall:
 	@echo "$(COLOR_YELLOW)Uninstalling spotCLI...$(COLOR_RESET)"
 	@sudo rm -f /usr/local/bin/spotCLI
 	@echo "$(COLOR_GREEN)✓ Uninstall complete!$(COLOR_RESET)"
 
-# Remove authentication token
+# Logout (remove token)
 .PHONY: logout
 logout:
 	@echo "$(COLOR_YELLOW)Removing authentication token...$(COLOR_RESET)"
@@ -90,7 +89,7 @@ debug: CFLAGS += -g -DDEBUG
 debug: clean $(TARGET)
 	@echo "$(COLOR_GREEN)✓ Debug build complete!$(COLOR_RESET)"
 
-# Show help
+# Help
 .PHONY: help
 help:
 	@echo "$(COLOR_BLUE)spotCLI Makefile Commands:$(COLOR_RESET)"

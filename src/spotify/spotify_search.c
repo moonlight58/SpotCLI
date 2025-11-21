@@ -1,4 +1,7 @@
-#include "spotify_search.h"
+#include "api.h"
+#include "spotify/spotify_search.h"
+#include <string.h>
+#include <stdio.h>
 
 SpotifyTrackList* spotify_search_tracks(SpotifyToken *token, const char *query, int limit) {
     char *encoded_query = url_encode(query);
@@ -114,7 +117,7 @@ SpotifyTrackList* spotify_get_artist_top_tracks(SpotifyToken *token, const char 
     return list;
 }
 
-spotifyalbumlist* spotify_get_artist_albums(spotifytoken *token, const char *artist_id) {
+SpotifyAlbumList* spotify_get_artist_albums(SpotifyToken *token, const char *artist_id) {
     char url[256];
     snprintf(url, sizeof(url),
             "https://api.spotify.com/v1/artists/%s/albums?limit=50&include_groups=album",

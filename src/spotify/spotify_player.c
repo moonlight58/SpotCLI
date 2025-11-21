@@ -1,4 +1,9 @@
-#include "spotify_player.h"
+#include "api.h"
+#include "spotify/spotify_player.h"
+#include <stdio.h>
+
+char *context_repeat[] = {"off", "context", "track"};
+int context_index=0;
 
 SpotifyPlayerState* spotify_get_player_state(SpotifyToken *token) {
     const char *url = "https://api.spotify.com/v1/me/player";
@@ -245,7 +250,7 @@ SpotifyQueue* spotify_get_queue(SpotifyToken *token) {
 /**
  * Add an item to the end of the user's current playback queue
  */
-bool spotify_add_to_queue(spotifytoken *token, const char *uri, const char *device_id) {
+bool spotify_add_to_queue(SpotifyToken *token, const char *uri, const char *device_id) {
     if (!token || !uri) {
         fprintf(stderr, "Invalid parameters for add_to_queue\n");
         return false;

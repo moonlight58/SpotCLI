@@ -1,4 +1,8 @@
-#include "spotify_playlist.h"
+#include "api.h"
+#include "spotify/spotify_playlist.h"
+#include <stdbool.h>
+#include <string.h>
+#include <stdio.h>
 
 SpotifyPlaylistFull* spotify_create_playlist(SpotifyToken *token, const char *name, const char *description, bool is_public, bool is_collaborative) {
     if (!token || !name) {
@@ -239,7 +243,7 @@ SpotifyPlaylistResult* spotify_remove_tracks_from_playlist(SpotifyToken *token, 
     return result;
 }
 
-bool spotify_unfollow_playlist(spotifytoken *token, const char *playlist_id) {
+bool spotify_unfollow_playlist(SpotifyToken *token, const char *playlist_id) {
     if (!token || !playlist_id) {
         fprintf(stderr, "Invalid parameters for unfollow_playlist\n");
         return NULL;
