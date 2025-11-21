@@ -1,4 +1,3 @@
-#include "api.h"
 #include "spotify/spotify_internal.h"
 #include <stdio.h>
 #include <stdlib.h>

@@ -1,7 +1,7 @@
 #ifndef SPOTIFY_PLAYLIST_H
 #define SPOTIFY_PLAYLIST_H
 
-#include "api.h"
+#include "spotify/spotify_internal.h"
 #include <stdbool.h>
 #include <string.h>
 #include <stdio.h>

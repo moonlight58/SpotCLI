@@ -1,4 +1,3 @@
-#include "api.h"
 #include "spotify/spotify_search.h"
 #include <string.h>
 #include <stdio.h>

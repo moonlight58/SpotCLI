@@ -1,4 +1,4 @@
-#include "api.h"
+#include "spotify/spotify_internal.h"
 #include "spotify/spotify_library.h"
 #include <stdio.h>
 

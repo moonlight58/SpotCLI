@@ -1,4 +1,3 @@
-#include "api.h"
 #include "spotify/spotify_player.h"
 #include <stdio.h>
 

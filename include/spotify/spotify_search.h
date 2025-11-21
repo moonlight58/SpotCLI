@@ -1,7 +1,7 @@
 #ifndef SPOTIFY_SEARCH_H
 #define SPOTIFY_SEARCH_H
 
-#include "api.h"
+#include "spotify/spotify_internal.h"
 
 SpotifyTrackList* spotify_search_tracks(SpotifyToken *token, const char *query, int limit);
 SpotifyArtistList* spotify_search_artists(SpotifyToken *token, const char *query, int limit);

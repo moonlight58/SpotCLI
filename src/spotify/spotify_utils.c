@@ -1,4 +1,4 @@
-#include "api.h"
+#include "spotify/spotify_playlist.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

@@ -1,4 +1,3 @@
-#include "api.h"
 #include "spotify/spotify_playlist.h"
 #include <stdbool.h>
 #include <string.h>

@@ -1,4 +1,3 @@
-#include "api.h"
 #include "spotify/spotify_auth.h"
 
 char* spotify_get_current_user_id(SpotifyToken *token) {

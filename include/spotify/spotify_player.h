@@ -1,7 +1,7 @@
 #ifndef SPOTIFY_PLAYER_H
 #define SPOTIFY_PLAYER_H
 
-#include "api.h"
+#include "spotify/spotify_internal.h"
 
 SpotifyPlayerState* spotify_get_player_state(SpotifyToken *token);
 bool spotify_pause_playback(SpotifyToken *token, const char *device_id);
