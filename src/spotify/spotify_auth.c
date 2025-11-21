@@ -1,4 +1,6 @@
-#include "spotify/spotify_auth.h"
+#include "spotify/spotify_internal.h"
+#include <string.h>
+#include <stdlib.h>
 
 char* spotify_get_current_user_id(SpotifyToken *token) {
     const char *url = "https://api.spotify.com/v1/me";
@@ -17,4 +19,3 @@ char* spotify_get_current_user_id(SpotifyToken *token) {
     
     return user_id;
 }
-
