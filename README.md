@@ -175,28 +175,37 @@ spotCLI -i
 ```
 spotCLI/
 ├── include/
-│   ├── api.h
-│   ├── auth.h
-│   ├── dotenv.h
-│   ├── spotify_api.h 
-│   ├── spotify_http.h
-│   ├── spotify_internal.h
-│   ├── spotify_parsers.h 
-│   └── spotify_utils.h
-├── src/
-│   ├── api.c              # Spotify API calls
-│   ├── auth.c             # OAuth authentication
-│   ├── callback_server.c  # Local HTTP server for OAuth callback
-│   ├── dotenv.c           # Environment variable loader
-│   ├── spotify_api.c 
-│   ├── spotify_http.c
-│   ├── spotify_parsers.c
-│   ├── spotify_utils.c
-│   └── main.c             # Main program and CLI interface
+│   ├── api.h
+│   ├── auth.h
+│   ├── dotenv.h
+│   └── spotify/
+│       ├── spotify_api.h
+│       ├── spotify_auth.h
+│       ├── spotify_http.h
+│       ├── spotify_internal.h
+│       ├── spotify_library.h
+│       ├── spotify_parsers.h
+│       ├── spotify_player.h
+│       ├── spotify_playlist.h
+│       ├── spotify_search.h
+│       └── spotify_utils.h
+├── LICENSE
 ├── Makefile
-├── .env                   # Your credentials (not in git!)
-├── .gitignore
-└── README.md
+├── README.md
+└── src/
+    ├── auth.c
+    ├── callback_server.c
+    ├── dotenv.c
+    ├── main.c
+    └── spotify/
+        ├── spotify_auth.c
+        ├── spotify_http.c
+        ├── spotify_library.c
+        ├── spotify_parsers.c
+        ├── spotify_player.c
+        ├── spotify_playlist.c
+        ├── spotify_search.c
+        └── spotify_utils.c
 ```
 
 ## Configuration Files
