@@ -178,17 +178,17 @@ spotCLI/
 │   ├── api.h
 │   ├── auth.h
 │   ├── dotenv.h
-│   ├── spotify_api.h 
+│   ├── spotify_api.h
 │   ├── spotify_http.h
 │   ├── spotify_internal.h
-│   ├── spotify_parsers.h 
+│   ├── spotify_parsers.h
 │   └── spotify_utils.h
 ├── src/
 │   ├── api.c              # Spotify API calls
 │   ├── auth.c             # OAuth authentication
 │   ├── callback_server.c  # Local HTTP server for OAuth callback
 │   ├── dotenv.c           # Environment variable loader
-│   ├── spotify_api.c 
+│   ├── spotify_api.c
 │   ├── spotify_http.c
 │   ├── spotify_parsers.c
 │   ├── spotify_utils.c

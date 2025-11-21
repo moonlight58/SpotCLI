@@ -7,12 +7,17 @@
 #include <getopt.h>
 
 // ===== DÉCLARATIONS DE FONCTIONS =====
-void view_and_transfer_devices(SpotifyToken *token);
-void view_artist_top_tracks(SpotifyToken *token, const char *artist_id, const char *artist_name);
-void view_artist_albums(SpotifyToken *token, const char *artist_id, const char *artist_name);
-void view_users_playlists(SpotifyToken *token, int limit, int offset);
-void search_artist_and_view_top_tracks(SpotifyToken *token, const char *query);
+void add_track_to_playlist_interactive(SpotifyToken *token);
+void create_playlist_interactive(SpotifyToken *token);
+void manage_playlist_interactive(SpotifyToken *token);
+void remove_track_from_playlist_interactive(SpotifyToken *token);
 void search_artist_and_view_albums(SpotifyToken *token, const char *query);
+void search_artist_and_view_top_tracks(SpotifyToken *token, const char *query);
+void unfollow_playlist_interactive(SpotifyToken *token);
+void view_and_transfer_devices(SpotifyToken *token);
+void view_artist_albums(SpotifyToken *token, const char *artist_id, const char *artist_name);
+void view_artist_top_tracks(SpotifyToken *token, const char *artist_id, const char *artist_name);
+void view_users_playlists(SpotifyToken *token, int limit, int offset);
 
 void view_and_transfer_devices(SpotifyToken *token) {
     printf("\nFetching available devices...\n");
@@ -85,7 +90,7 @@ void print_usage(const char *prog_name) {
 }
 
 void print_menu() {
-    printf("\n=== findSpot - Spotify CLI ===\n");
+    printf("\n=== spotCLI - Spotify CLI ===\n");
     printf("1. Exit\n");
     printf("2. Options\n");
     printf("3. View saved tracks\n");
@@ -97,8 +102,14 @@ void print_menu() {
     printf("9. View playback queue\n");
     printf("10. Add track to queue\n");
     printf("11. Add artist track to queue\n");
+    printf("── Playlist Management ──\n");
+    printf("12. Create new playlist\n");
+    printf("13. Manage playlist (edit details)\n");
+    printf("14. Add track to playlist\n");
+    printf("15. Remove track from playlist\n");
     printf("Choose an option: ");
 }
+
 void search_artists(SpotifyToken *token, const char *query) {
     printf("\nSearching for artists matching '%s'...\n", query);
     SpotifyArtistList *results = spotify_search_artists(token, query, 10);
@@ -586,6 +597,18 @@ void interactive_mode(SpotifyToken *token) {
             case 11:  // ADD ARTIST TRACK TO QUEUE
                 add_artist_track_to_queue(token);
                 break;
+            case 12:  // CREATE PLAYLIST
+                create_playlist_interactive(token);
+                break;
+            case 13:  // MANAGE PLAYLIST
+                manage_playlist_interactive(token);
+                break;
+            case 14:  // ADD TRACK TO PLAYLIST
+                add_track_to_playlist_interactive(token);
+                break;
+            case 15:  // REMOVE TRACK FROM PLAYLIST
+                remove_track_from_playlist_interactive(token);
+                break;
             default:
                 printf("Invalid option. Please try again.\n");
         }
@@ -721,4 +744,344 @@ int main(int argc, char *argv[]) {
     }
 
     return 0;
+}
+
+void create_playlist_interactive(SpotifyToken *token) {
+    printf("\n=== Create New Playlist ===\n");
+    
+    char name[256];
+    char description[1024] = {0};
+    char choice;
+    bool is_public = true;
+    bool is_collaborative = false;
+    
+    // Get playlist name
+    printf("Enter playlist name: ");
+    if (!fgets(name, sizeof(name), stdin)) {
+        printf("Invalid input.\n");
+        return;
+    }
+    name[strcspn(name, "\n")] = '\0';
+    
+    if (strlen(name) == 0) {
+        printf("Playlist name cannot be empty.\n");
+        return;
+    }
+    
+    // Get description (optional)
+    printf("Enter description (press Enter to skip): ");
+    if (fgets(description, sizeof(description), stdin)) {
+        description[strcspn(description, "\n")] = '\0';
+    }
+    
+    // Public/Private
+    printf("Make playlist public? (y/n) [y]: ");
+    if (scanf(" %c", &choice) == 1) {
+        is_public = (choice != 'n' && choice != 'N');
+    }
+    getchar(); // consume newline
+    
+    // Collaborative (only for private playlists)
+    if (!is_public) {
+        printf("Make playlist collaborative? (y/n) [n]: ");
+        if (scanf(" %c", &choice) == 1) {
+            is_collaborative = (choice == 'y' || choice == 'Y');
+        }
+        getchar();
+    }
+    
+    printf("\nCreating playlist '%s'...\n", name);
+    
+    SpotifyPlaylistFull *playlist = spotify_create_playlist(
+        token, name,
+        strlen(description) > 0 ? description : NULL,
+        is_public, is_collaborative
+    );
+    
+    if (playlist) {
+        printf("✅ Playlist created successfully!\n");
+        spotify_print_playlist_full(playlist);
+        spotify_free_playlist_full(playlist);
+    } else {
+        printf("❌ Failed to create playlist.\n");
+    }
+}
+
+void manage_playlist_interactive(SpotifyToken *token) {
+    printf("\n=== Manage Playlist ===\n");
+    
+    // First show user's playlists
+    SpotifyPlaylistList *playlists = spotify_get_user_playlists(token, 20, 0);
+    
+    if (!playlists || playlists->count == 0) {
+        printf("No playlists found.\n");
+        if (playlists) spotify_free_playlist_list(playlists);
+        return;
+    }
+    
+    printf("\nYour playlists:\n\n");
+    for (int i = 0; i < playlists->count; i++) {
+        spotify_print_playlist(&playlists->playlists[i], i + 1);
+        printf("\n");
+    }
+    
+    printf("Enter playlist number to manage (or 0 to cancel): ");
+    int choice;
+    if (scanf("%d", &choice) != 1) {
+        printf("Invalid input.\n");
+        spotify_free_playlist_list(playlists);
+        return;
+    }
+    getchar();
+    
+    if (choice <= 0 || choice > playlists->count) {
+        spotify_free_playlist_list(playlists);
+        return;
+    }
+    
+    const char *playlist_id = playlists->playlists[choice - 1].id;
+    
+    // Get full playlist details
+    SpotifyPlaylistFull *playlist = spotify_get_playlist(token, playlist_id, true, 50);
+    spotify_free_playlist_list(playlists);
+    
+    if (!playlist) {
+        printf("Failed to get playlist details.\n");
+        return;
+    }
+    
+    spotify_print_playlist_full(playlist);
+    
+    printf("\nWhat would you like to do?\n");
+    printf("1. Change name\n");
+    printf("2. Change description\n");
+    printf("3. Toggle public/private\n");
+    printf("4. Toggle collaborative\n");
+    printf("5. Unfollow playlist\n");
+    printf("6. Cancel\n");
+    printf("Choice: ");
+    
+    int action;
+    if (scanf("%d", &action) != 1) {
+        printf("Invalid input.\n");
+        spotify_free_playlist_full(playlist);
+        return;
+    }
+    getchar();
+    
+    SpotifyPlaylistUpdate updates = {0};
+    bool do_update = false;
+    
+    switch (action) {
+        case 1: {
+            char new_name[256];
+            printf("Enter new name: ");
+            if (fgets(new_name, sizeof(new_name), stdin)) {
+                new_name[strcspn(new_name, "\n")] = '\0';
+                if (strlen(new_name) > 0) {
+                    updates.name = new_name;
+                    do_update = true;
+                }
+            }
+            break;
+        }
+        case 2: {
+            char new_desc[1024];
+            printf("Enter new description: ");
+            if (fgets(new_desc, sizeof(new_desc), stdin)) {
+                new_desc[strcspn(new_desc, "\n")] = '\0';
+                updates.description = new_desc;
+                do_update = true;
+            }
+            break;
+        }
+        case 3: {
+            bool new_public = !playlist->is_public;
+            updates.is_public = &new_public;
+            do_update = true;
+            printf("Setting playlist to %s...\n", new_public ? "public" : "private");
+            break;
+        }
+        case 4: {
+            bool new_collab = !playlist->is_collaborative;
+            updates.is_collaborative = &new_collab;
+            do_update = true;
+            printf("Setting collaborative to %s...\n", new_collab ? "on" : "off");
+            break;
+        }
+        case 5: {
+            
+        }
+        default:
+            break;
+    }
+    
+    if (do_update) {
+        if (spotify_update_playlist(token, playlist->id, &updates)) {
+            printf("✅ Playlist updated successfully!\n");
+        } else {
+            printf("❌ Failed to update playlist.\n");
+        }
+    }
+    
+    spotify_free_playlist_full(playlist);
+}
+
+void add_track_to_playlist_interactive(SpotifyToken *token) {
+    printf("\n=== Add Track to Playlist ===\n");
+    
+    // First search for a track
+    char query[256];
+    printf("Search for track: ");
+    if (!fgets(query, sizeof(query), stdin)) {
+        printf("Invalid input.\n");
+        return;
+    }
+    query[strcspn(query, "\n")] = '\0';
+    
+    SpotifyTrackList *tracks = spotify_search_tracks(token, query, 10);
+    if (!tracks || tracks->count == 0) {
+        printf("No tracks found.\n");
+        if (tracks) spotify_free_track_list(tracks);
+        return;
+    }
+    
+    printf("\nFound tracks:\n\n");
+    for (int i = 0; i < tracks->count; i++) {
+        spotify_print_track(&tracks->tracks[i], i + 1);
+        printf("\n");
+    }
+    
+    printf("Select track (or 0 to cancel): ");
+    int track_choice;
+    if (scanf("%d", &track_choice) != 1 || track_choice <= 0 || track_choice > tracks->count) {
+        spotify_free_track_list(tracks);
+        return;
+    }
+    getchar();
+    
+    const char *track_uri = tracks->tracks[track_choice - 1].uri;
+    const char *track_name = tracks->tracks[track_choice - 1].name;
+    
+    // Now select playlist
+    SpotifyPlaylistList *playlists = spotify_get_user_playlists(token, 20, 0);
+    if (!playlists || playlists->count == 0) {
+        printf("No playlists found.\n");
+        spotify_free_track_list(tracks);
+        if (playlists) spotify_free_playlist_list(playlists);
+        return;
+    }
+    
+    printf("\nYour playlists:\n\n");
+    for (int i = 0; i < playlists->count; i++) {
+        spotify_print_playlist(&playlists->playlists[i], i + 1);
+        printf("\n");
+    }
+    
+    printf("Select playlist (or 0 to cancel): ");
+    int playlist_choice;
+    if (scanf("%d", &playlist_choice) != 1 || playlist_choice <= 0 || 
+        playlist_choice > playlists->count) {
+        spotify_free_track_list(tracks);
+        spotify_free_playlist_list(playlists);
+        return;
+    }
+    getchar();
+    
+    const char *playlist_id = playlists->playlists[playlist_choice - 1].id;
+    const char *playlist_name = playlists->playlists[playlist_choice - 1].name;
+    
+    printf("\nAdding '%s' to '%s'...\n", track_name, playlist_name);
+    
+    const char *uris[] = { track_uri };
+    SpotifyPlaylistResult *result = spotify_add_tracks_to_playlist(token, playlist_id, uris, 1, -1);
+    
+    if (result && result->success) {
+        printf("✅ Track added successfully!\n");
+        spotify_free_playlist_result(result);
+    } else {
+        printf("❌ Failed to add track.\n");
+    }
+    
+    spotify_free_track_list(tracks);
+    spotify_free_playlist_list(playlists);
+}
+
+void remove_track_from_playlist_interactive(SpotifyToken *token) {
+    printf("\n=== Remove Track from Playlist ===\n");
+    
+    // Select playlist
+    SpotifyPlaylistList *playlists = spotify_get_user_playlists(token, 20, 0);
+    if (!playlists || playlists->count == 0) {
+        printf("No playlists found.\n");
+        if (playlists) spotify_free_playlist_list(playlists);
+        return;
+    }
+    
+    printf("\nYour playlists:\n\n");
+    for (int i = 0; i < playlists->count; i++) {
+        spotify_print_playlist(&playlists->playlists[i], i + 1);
+        printf("\n");
+    }
+    
+    printf("Select playlist (or 0 to cancel): ");
+    int playlist_choice;
+    if (scanf("%d", &playlist_choice) != 1 || playlist_choice <= 0 || 
+        playlist_choice > playlists->count) {
+        spotify_free_playlist_list(playlists);
+        return;
+    }
+    getchar();
+    
+    const char *playlist_id = playlists->playlists[playlist_choice - 1].id;
+    spotify_free_playlist_list(playlists);
+    
+    // Get playlist with tracks
+    SpotifyPlaylistFull *playlist = spotify_get_playlist(token, playlist_id, true, 50);
+    if (!playlist) {
+        printf("Failed to get playlist.\n");
+        return;
+    }
+    
+    if (playlist->tracks_count == 0) {
+        printf("Playlist is empty.\n");
+        spotify_free_playlist_full(playlist);
+        return;
+    }
+    
+    spotify_print_playlist_full(playlist);
+    
+    printf("\nSelect track to remove (or 0 to cancel): ");
+    int track_choice;
+    if (scanf("%d", &track_choice) != 1 || track_choice <= 0 || 
+        track_choice > playlist->tracks_count) {
+        spotify_free_playlist_full(playlist);
+        return;
+    }
+    getchar();
+    
+    const char *track_uri = playlist->tracks[track_choice - 1].uri;
+    const char *track_name = playlist->tracks[track_choice - 1].name;
+    
+    printf("\nRemoving '%s' from '%s'...\n", track_name, playlist->name);
+    
+    const char *uris[] = { track_uri };
+    SpotifyPlaylistResult *result = spotify_remove_tracks_from_playlist(
+        token, playlist->id, uris, 1, playlist->snapshot_id
+    );
+    
+    if (result && result->success) {
+        printf("✅ Track removed successfully!\n");
+        spotify_free_playlist_result(result);
+    } else {
+        printf("❌ Failed to remove track.\n");
+    }
+    
+    spotify_free_playlist_full(playlist);
+}
+
+void unfollow_playlist_interactive(SpotifyToken *token) {
+    printf("\n=== Unfollowing Playlist ===\n");
+
+    bool *playlist
 }
