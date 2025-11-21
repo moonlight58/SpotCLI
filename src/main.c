@@ -7,18 +7,187 @@
 #include <getopt.h>
 
 // ===== DÉCLARATIONS DE FONCTIONS =====
-void add_track_to_playlist_interactive(SpotifyToken *token);
-void create_playlist_interactive(SpotifyToken *token);
-void manage_playlist_interactive(SpotifyToken *token);
-void remove_track_from_playlist_interactive(SpotifyToken *token);
-void search_artist_and_view_albums(SpotifyToken *token, const char *query);
-void search_artist_and_view_top_tracks(SpotifyToken *token, const char *query);
-void unfollow_playlist_interactive(SpotifyToken *token);
 void view_and_transfer_devices(SpotifyToken *token);
-void view_artist_albums(SpotifyToken *token, const char *artist_id, const char *artist_name);
 void view_artist_top_tracks(SpotifyToken *token, const char *artist_id, const char *artist_name);
+void view_artist_albums(SpotifyToken *token, const char *artist_id, const char *artist_name);
 void view_users_playlists(SpotifyToken *token, int limit, int offset);
+void search_artist_and_view_top_tracks(SpotifyToken *token, const char *query);
+void search_artist_and_view_albums(SpotifyToken *token, const char *query);
 
+<<<<<<< HEAD
+=======
+void view_and_transfer_devices(SpotifyToken *token) {
+    printf("\nFetching available devices...\n");
+
+    int device_count = 0;
+    SpotifyDevice *devices = spotify_get_available_devices(token, &device_count);
+
+    if (!devices || device_count == 0) {
+        printf("No devices found. Make sure Spotify is open on at least one device.\n");
+        if (devices) free(devices);
+        return;
+    }
+
+    printf("\nFound %d device(s):\n\n", device_count);
+
+    for (int i = 0; i < device_count; i++) {
+        spotify_print_device(&devices[i], i + 1);
+        printf("\n");
+    }
+
+    printf("Enter device number to transfer playback (or 0 to cancel): ");
+    int choice;
+    if (scanf("%d", &choice) != 1) {
+        printf("Invalid input.\n");
+        free(devices);
+        return;
+    }
+    getchar(); // consume newline
+
+    if (choice > 0 && choice <= device_count) {
+        const char *device_id = devices[choice - 1].device_id;
+        const char *device_name = devices[choice - 1].device_name;
+
+        printf("Transfer playback to '%s'? Start playing? (y/n): ", device_name);
+        char start_play;
+        scanf(" %c", &start_play);
+        getchar();
+
+        bool play = (start_play == 'y' || start_play == 'Y');
+
+        printf("Transferring playback to %s...\n", device_name);
+        if (spotify_transfer_playback(token, device_id, play)) {
+            printf("✅ Playback transferred successfully!\n");
+        } else {
+            printf("❌ Failed to transfer playback.\n");
+        }
+    }
+
+    free(devices);
+}
+
+void print_usage(const char *prog_name) {
+    printf("Usage: %s [OPTIONS] \"search query\"\n\n", prog_name);
+    printf("Options:\n");
+    printf("  -t, --track       Search for tracks (default)\n");
+    printf("  -a, --artist      Search for artists\n");
+    printf("  -A, --album       Search for albums\n");
+    printf("  -p, --playlist    Search for playlists\n");
+    printf("  -P, --player      Display the current player state (current music played, time of the music, etc...)\n");
+    printf("  -u, --user        Search for users\n");
+    printf("  -b, --audiobook   Search for audiobooks\n");
+    printf("  -l, --list        List your saved tracks\n");
+    printf("  -i, --interactive Interactive mode (menu)\n");
+    printf("  -h, --help        Show this help message\n\n");
+    printf("Examples:\n");
+    printf("  %s -t \"PTSMR\"\n", prog_name);
+    printf("  %s --artist \"tyler, the creator\"\n", prog_name);
+    printf("  %s --list\n", prog_name);
+    printf("  %s --interactive\n\n", prog_name);
+}
+
+void print_menu() {
+    printf("\n=== findSpot - Spotify CLI ===\n");
+    printf("1. Exit\n");
+    printf("2. Options\n");
+    printf("3. View saved tracks\n");
+    printf("4. Search for artists\n");
+    printf("5. Search for tracks\n");
+    printf("6. View artist's top tracks\n");
+    printf("7. View artist's albums\n");
+    printf("8. View your playlists\n");
+    printf("9. View playback queue\n");
+    printf("10. Add track to queue\n");
+    printf("11. Add artist track to queue\n");
+    printf("Choose an option: ");
+}
+void search_artists(SpotifyToken *token, const char *query) {
+    printf("\nSearching for artists matching '%s'...\n", query);
+    SpotifyArtistList *results = spotify_search_artists(token, query, 10);
+
+    if (!results || results->count == 0) {
+        printf("No artists found.\n");
+        if (results) spotify_free_artist_list(results);
+        return;
+    }
+
+    printf("\nFound %d results (total: %d)\n\n", results->count, results->total);
+
+    for (int i = 0; i < results->count; i++) {
+        spotify_print_artist(&results->artists[i], i + 1);
+        printf("\n");
+    }
+
+    spotify_free_artist_list(results);
+}
+
+void view_queue(SpotifyToken *token) {
+    printf("\nFetching playback queue...\n");
+    
+    SpotifyQueue *queue = spotify_get_queue(token);
+    
+    if (!queue) {
+        printf("Failed to get queue. Make sure Spotify is playing on an active device.\n");
+        return;
+    }
+    
+    spotify_print_queue(queue);
+    spotify_free_queue(queue);
+}
+
+void add_track_to_queue_interactive(SpotifyToken *token) {
+    printf("\n=== Add Track to Queue ===\n");
+    printf("Enter search query: ");
+    
+    char query[256];
+    if (!fgets(query, sizeof(query), stdin)) {
+        printf("Invalid input.\n");
+        return;
+    }
+    query[strcspn(query, "\n")] = '\0';
+    
+    // Search for tracks
+    printf("\nSearching for '%s'...\n", query);
+    SpotifyTrackList *results = spotify_search_tracks(token, query, 10);
+    
+    if (!results || results->count == 0) {
+        printf("No tracks found.\n");
+        if (results) spotify_free_track_list(results);
+        return;
+    }
+    
+    printf("\nFound %d results:\n\n", results->count);
+    
+    for (int i = 0; i < results->count; i++) {
+        spotify_print_track(&results->tracks[i], i + 1);
+        printf("\n");
+    }
+    
+    printf("Enter track number to add to queue (or 0 to cancel): ");
+    int choice;
+    if (scanf("%d", &choice) != 1) {
+        printf("Invalid input.\n");
+        spotify_free_track_list(results);
+        return;
+    }
+    getchar(); // consume newline
+    
+    if (choice > 0 && choice <= results->count) {
+        const char *track_uri = results->tracks[choice - 1].uri;
+        const char *track_name = results->tracks[choice - 1].name;
+        
+        printf("Adding '%s' to queue...\n", track_name);
+        if (spotify_add_to_queue(token, track_uri, NULL)) {
+            printf("✅ Track added to queue successfully!\n");
+        } else {
+            printf("❌ Failed to add track to queue.\n");
+        }
+    }
+    
+    spotify_free_track_list(results);
+}
+
+>>>>>>> parent of 510cf6a (playlist management added (WIP: unfollowing playlist))
 void add_artist_track_to_queue(SpotifyToken *token) {
     printf("\n=== Add Artist Track to Queue ===\n");
     printf("Enter artist name: ");
@@ -379,24 +548,13 @@ void interactive_mode(SpotifyToken *token) {
             case 11:  // ADD ARTIST TRACK TO QUEUE
                 add_artist_track_to_queue(token);
                 break;
-            case 12:  // CREATE PLAYLIST
-                create_playlist_interactive(token);
-                break;
-            case 13:  // MANAGE PLAYLIST
-                manage_playlist_interactive(token);
-                break;
-            case 14:  // ADD TRACK TO PLAYLIST
-                add_track_to_playlist_interactive(token);
-                break;
-            case 15:  // REMOVE TRACK FROM PLAYLIST
-                remove_track_from_playlist_interactive(token);
-                break;
             default:
                 printf("Invalid option. Please try again.\n");
         }
     }
 }
 
+<<<<<<< HEAD
 
 void manage_playlist_interactive(SpotifyToken *token) {
     printf("\n=== Manage Playlist ===\n");
@@ -975,6 +1133,8 @@ void view_users_playlists(SpotifyToken *token, int limit, int offset) {
     spotify_free_playlist_list(playlist);
 }
 
+=======
+>>>>>>> parent of 510cf6a (playlist management added (WIP: unfollowing playlist))
 int main(int argc, char *argv[]) {
     // Load environment variables from .env file
     load_dotenv(".env");
@@ -1092,9 +1252,14 @@ int main(int argc, char *argv[]) {
         search_artists(&token, query);
     } else if (strcmp(search_type, "album") == 0) {
         search_artist_and_view_albums(&token, query);
+<<<<<<< HEAD
     } else if (strcmp(search_type, "playlist") == 0) {
         view_users_playlists(&token, limit=10, offset=0);
     } else if (strcmp(search_type, "user") == 0 ||
+=======
+    } else if (strcmp(search_type, "playlist") == 0 ||
+            strcmp(search_type, "user") == 0 ||
+>>>>>>> parent of 510cf6a (playlist management added (WIP: unfollowing playlist))
             strcmp(search_type, "audiobook") == 0) {
         printf("⚠️  Search type '%s' not yet implemented.\n", search_type);
         printf("Currently supported: track (-t), artist (-a)\n");

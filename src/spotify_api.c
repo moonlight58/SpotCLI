@@ -236,6 +236,7 @@ SpotifyPlayerState* spotify_get_player_state(SpotifyToken *token) {
     return state;
 }
 
+<<<<<<< HEAD
 
 SpotifyPlaylistFull* spotify_create_playlist(SpotifyToken *token, const char *name,
                                              const char *description, bool is_public,
@@ -643,6 +644,10 @@ SpotifyTrackList* spotify_search_tracks(SpotifyToken *token, const char *query, 
     return list;
 }
 
+=======
+/**
+ * Add an item to the end of the user's current playback queue
+>>>>>>> parent of 510cf6a (playlist management added (WIP: unfollowing playlist))
  */
 bool spotify_add_to_queue(SpotifyToken *token, const char *uri, const char *device_id) {
     if (!token || !uri) {
@@ -664,6 +669,7 @@ bool spotify_add_to_queue(SpotifyToken *token, const char *uri, const char *devi
 
     return spotify_api_post_empty(token, url);
 }
+<<<<<<< HEAD
 
  */
 bool spotify_pause_playback(SpotifyToken *token, const char *device_id) {
@@ -958,3 +964,5 @@ char* spotify_get_current_user_id(SpotifyToken *token) {
     return user_id;
 }
 
+=======
+>>>>>>> parent of 510cf6a (playlist management added (WIP: unfollowing playlist))

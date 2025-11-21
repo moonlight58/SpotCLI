@@ -69,6 +69,7 @@ bool spotify_api_post_empty(SpotifyToken *token, const char *url) {
     // Spotify returns 204 No Content on success
     return (res == CURLE_OK && response_code == 204);
 }
+<<<<<<< HEAD
 
 bool spotify_api_post(SpotifyToken *token, const char *url, const char *json_data) {
     CURL *curl = curl_easy_init();
@@ -335,3 +336,5 @@ struct json_object* spotify_api_post_json(SpotifyToken *token, const char *url, 
 
     return root;
 }
+=======
+>>>>>>> parent of 510cf6a (playlist management added (WIP: unfollowing playlist))
