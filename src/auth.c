@@ -9,32 +9,19 @@
 #include <unistd.h>
 #include <time.h>
 
-// Get full path to token file
-char* get_token_path() {
-    static char path[512];
-    const char *home = getenv("HOME");
-    if (!home) home = getenv("USERPROFILE"); // Windows fallback
-    if (!home) return NULL;
+bool spotify_get_access_token(SpotifyToken *token) {
+    if (!spotify_load_token(token)) {
+        printf("No token found, starting authorization...\n");
+        return spotify_authorize(token);
+    }
     
-    snprintf(path, sizeof(path), "%s/%s/%s", home, TOKEN_DIR, TOKEN_FILENAME);
-    return path;
-}
-
-// Create token directory if it doesn't exist
-static void ensure_token_dir() {
-    const char *home = getenv("HOME");
-    if (!home) return;
+    // Check if token is expired
+    if (spotify_token_is_expired(token)) {
+        printf("Token expired, refreshing...\n");
+        return spotify_refresh_token(token);
+    }
     
-    char dir_path[512];
-    snprintf(dir_path, sizeof(dir_path), "%s/%s", home, TOKEN_DIR);
-    mkdir(dir_path, 0700);
-}
-
-static size_t write_callback(void *ptr, size_t size, size_t nmemb, void *stream) {
-
-size_t realsize = size * nmemb;
-    strncat((char *)stream, ptr, realsize);
-    return realsize;
+    return true;
 }
 
 bool spotify_is_authenticated() {
@@ -43,25 +30,6 @@ bool spotify_is_authenticated() {
     
     FILE *f = fopen(token_path, "r");
     if (!f) return false;
-    return true;
-}
-
-bool spotify_save_token(SpotifyToken *token) {
-    ensure_token_dir();
-    char *token_path = get_token_path();
-    if (!token_path) return false;
-    
-    FILE *f = fopen(token_path, "w");
-    if (!f) return false;
-    
-    // Save current time as obtained_at if not set
-    if (token->obtained_at == 0) {
-        token->obtained_at = time(NULL);
-    }
-    
-    fprintf(f, "{ \"access_token\": \"%s\", \"refresh_token\": \"%s\", \"expires_in\": %ld, \"obtained_at\": %ld }",
-            token->access_token, token->refresh_token, token->expires_in, token->obtained_at);
-    fclose(f);
     return true;
 }
 
@@ -136,6 +104,26 @@ bool spotify_refresh_token(SpotifyToken *token) {
     return true;
 }
 
+bool spotify_save_token(SpotifyToken *token) {
+    ensure_token_dir();
+    char *token_path = get_token_path();
+    if (!token_path) return false;
+    
+    FILE *f = fopen(token_path, "w");
+    if (!f) return false;
+    
+    // Save current time as obtained_at if not set
+    if (token->obtained_at == 0) {
+        token->obtained_at = time(NULL);
+    }
+    
+    fprintf(f, "{ \"access_token\": \"%s\", \"refresh_token\": \"%s\", \"expires_in\": %ld, \"obtained_at\": %ld }",
+            token->access_token, token->refresh_token, token->expires_in, token->obtained_at);
+    fclose(f);
+    return true;
+}
+
+
 bool spotify_token_is_expired(SpotifyToken *token) {
     // If obtained_at is not set (0 or invalid), consider token valid
     // This prevents segfault when obtained_at is uninitialized
@@ -156,6 +144,18 @@ bool spotify_token_is_expired(SpotifyToken *token) {
     
     return is_expired;
 }
+
+// Get full path to token file
+char* get_token_path() {
+    static char path[512];
+    const char *home = getenv("HOME");
+    if (!home) home = getenv("USERPROFILE"); // Windows fallback
+    if (!home) return NULL;
+    
+    snprintf(path, sizeof(path), "%s/%s/%s", home, TOKEN_DIR, TOKEN_FILENAME);
+    return path;
+}
+
 
 char* start_callback_server(int port, char *code_buffer, size_t buffer_size);
 
@@ -242,17 +242,20 @@ bool spotify_authorize(SpotifyToken *token) {
     return true;
 }
 
-bool spotify_get_access_token(SpotifyToken *token) {
-    if (!spotify_load_token(token)) {
-        printf("No token found, starting authorization...\n");
-        return spotify_authorize(token);
-    }
+static size_t write_callback(void *ptr, size_t size, size_t nmemb, void *stream) {
+
+size_t realsize = size * nmemb;
+    strncat((char *)stream, ptr, realsize);
+    return realsize;
+}
+
+
+// Create token directory if it doesn't exist
+static void ensure_token_dir() {
+    const char *home = getenv("HOME");
+    if (!home) return;
     
-    // Check if token is expired
-    if (spotify_token_is_expired(token)) {
-        printf("Token expired, refreshing...\n");
-        return spotify_refresh_token(token);
-    }
-    
-    return true;
+    char dir_path[512];
+    snprintf(dir_path, sizeof(dir_path), "%s/%s", home, TOKEN_DIR);
+    mkdir(dir_path, 0700);
 }
