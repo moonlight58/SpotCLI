@@ -555,15 +555,9 @@ The app requests the following Spotify scopes:
 
 ---
 
-#### Recommended for Implementation
-
-**Start with Layout 1 or 5** - they provide good balance of:
-- Information density
-- Navigation clarity
-- Space for future features
-- Batch operation support
-
 **ncurses would be ideal** for rendering these with keyboard navigation and mouse support!
+
+---
 
 ## Contributing
 
