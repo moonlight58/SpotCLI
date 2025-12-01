@@ -19,20 +19,20 @@ bool spotify_get_access_token(SpotifyToken *token) {
         printf("No token found, starting authorization...\n");
         return spotify_authorize(token);
     }
-    
+
     // Check if token is expired
     if (spotify_token_is_expired(token)) {
         printf("Token expired, refreshing...\n");
         return spotify_refresh_token(token);
     }
-    
+
     return true;
 }
 
 bool spotify_is_authenticated() {
     char *token_path = get_token_path();
     if (!token_path) return false;
-    
+
     FILE *f = fopen(token_path, "r");
     if (!f) return false;
     fclose(f);
@@ -42,7 +42,7 @@ bool spotify_is_authenticated() {
 bool spotify_load_token(SpotifyToken *token) {
     char *token_path = get_token_path();
     if (!token_path) return false;
-    
+
     FILE *f = fopen(token_path, "r");
     if (!f) return false;
 
@@ -55,7 +55,7 @@ bool spotify_load_token(SpotifyToken *token) {
     strcpy(token->access_token, json_object_get_string(json_object_object_get(parsed, "access_token")));
     strcpy(token->refresh_token, json_object_get_string(json_object_object_get(parsed, "refresh_token")));
     token->expires_in = json_object_get_int64(json_object_object_get(parsed, "expires_in"));
-    
+
     // Load obtained_at if it exists, otherwise set to current time
     struct json_object *obtained_at_obj = json_object_object_get(parsed, "obtained_at");
     if (obtained_at_obj) {
@@ -77,7 +77,7 @@ bool spotify_refresh_token(SpotifyToken *token) {
     // Get credentials from environment
     const char *client_id = getenv("CLIENT_ID");
     const char *client_secret = getenv("CLIENT_SECRET");
-    
+
     if (!client_id || !client_secret) {
         fprintf(stderr, "Error: CLIENT_ID or CLIENT_SECRET not set in environment\n");
         curl_easy_cleanup(curl);
@@ -114,15 +114,15 @@ bool spotify_save_token(SpotifyToken *token) {
     ensure_token_dir();
     char *token_path = get_token_path();
     if (!token_path) return false;
-    
+
     FILE *f = fopen(token_path, "w");
     if (!f) return false;
-    
+
     // Save current time as obtained_at if not set
     if (token->obtained_at == 0) {
         token->obtained_at = time(NULL);
     }
-    
+
     fprintf(f, "{ \"access_token\": \"%s\", \"refresh_token\": \"%s\", \"expires_in\": %ld, \"obtained_at\": %ld }",
             token->access_token, token->refresh_token, token->expires_in, token->obtained_at);
     fclose(f);
@@ -137,17 +137,17 @@ static bool spotify_token_is_expired(SpotifyToken *token) {
         printf("Token obtained_at not set, assuming valid\n");
         return false;
     }
-    
+
     time_t now = time(NULL);
     time_t elapsed = now - token->obtained_at;
     time_t remaining = token->expires_in - elapsed;
-    
+
     // Refresh if less than 5 minutes remaining
     printf("Checking if token expired: elapsed=%ld, remaining=%ld\n", elapsed, remaining);
-    
+
     bool is_expired = (now - token->obtained_at) >= (token->expires_in - 300);
     printf("Token expired: %s\n", is_expired ? "yes" : "no");
-    
+
     return is_expired;
 }
 
@@ -157,13 +157,13 @@ char* get_token_path() {
     const char *home = getenv("HOME");
     if (!home) home = getenv("USERPROFILE"); // Windows fallback
     if (!home) return NULL;
-    
+
     snprintf(path, sizeof(path), "%s/%s/%s", home, TOKEN_DIR, TOKEN_FILENAME);
     return path;
 }
 
 bool spotify_authorize(SpotifyToken *token) {
-    
+
     if (!load_dotenv(".env")) {
         fprintf(stderr, "Erreur : impossible de charger le fichier .env\n");
         return false;
@@ -205,7 +205,7 @@ bool spotify_authorize(SpotifyToken *token) {
     sprintf(post_data,
             "grant_type=authorization_code&code=%s&redirect_uri=%s&client_id=%s&client_secret=%s",
             auth_code, redirect_uri, client_id, client_secret);
-    
+
     char response[4096] = {0};
     curl_easy_setopt(curl, CURLOPT_URL, "https://accounts.spotify.com/api/token");
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_data);
@@ -256,7 +256,7 @@ static size_t write_callback(void *ptr, size_t size, size_t nmemb, void *stream)
 static void ensure_token_dir() {
     const char *home = getenv("HOME");
     if (!home) return;
-    
+
     char dir_path[512];
     snprintf(dir_path, sizeof(dir_path), "%s/%s", home, TOKEN_DIR);
     mkdir(dir_path, 0700);

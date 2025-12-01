@@ -4,6 +4,8 @@
 #include "api.h"
 #include <json-c/json.h>
 #include <stdbool.h>
+#include <string.h>
+#include <stdio.h>
 
 // PUBLIC INTERFACE (WHAT USERS CAN SEE)
 
@@ -22,8 +24,6 @@ bool spotify_api_delete_empty(SpotifyToken *token, const char *url);
  * Returns allocated string that must be freed by caller
  */
 char* url_encode(const char *str);
-
-// ===== PARSER FUNCTIONS (spotify_parsers.c) =====
 
 /**
  * Parse track, artist, playlist, device, player state data from JSON object into SpotifyTrack struct

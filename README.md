@@ -264,34 +264,69 @@ The app requests the following Spotify scopes:
 
 ## Roadmap
 
-- [x] Artist search
-- [x] Tracks from an artist search
-- [x] Album search
-- [ ] Playlist management
-  - [x] Create Playlist
-  - [x] Delete Playlist
-  - [x] Add track into Playlist
-  - [x] Remove track from Playlist
-  - [x] Change info about Playlist (title/description/visibility/collaborative)
-- [ ] Player functionnality
-  - [x] Audio preview
-  - [x] Start/Resume
-  - [x] Pause
-  - [x] Toggle Shuffle
-  - [x] Skip to Next/Previous
+### Web API implementation
+- [ ] Albums
+  - [x] Get Albums
+  - [ ] Get Several Albums
+  - [ ] Get Album Tracks
+  - [ ] Get User's Saved Albums
+  - [ ] Save Albums for Current User
+  - [ ] Remove User's Saved Albums
+  - [ ] Check User's Saved Albums
+  - [ ] Get New Releases
+- [ ] Artists (spotify_artist.c/h)
+  - [ ] Get Artist
+  - [ ] Get Several Artists
+  - [x] Get Artist's Albums
+  - [x] Get Artist's Top Tracks
+- [ ] Categories
+  - [ ] Get Several Browse Categories
+  - [ ] Get Single Browse Category
+- [ ] Player
+  - [x] Get Playback State
+  - [x] Transfer Playback
+  - [x] Get Available Devices
+  - [ ] Get Currently Playing Track
+  - [x] Start/Resume Playback
+  - [x] Pause Playback
+  - [x] Skip To Next
+  - [x] Skip To Previous
+  - [ ] Skip To Position
+  - [x] Set Repeat Mode
   - [x] Set Playback Volume
-  - [x] User's Queue Tracks
-  - [x] Change playback device
-- [x] Create custom playlists
-- [x] Remove tracks from library
-- [x] Album search & detailed album info (tracks in album)
-- [x] User profile info (followers, public playlists)
-- [x] Recommendations songs (get recommendations based on seeds)
-- [x] Audio features (tempo, energy, danceability of tracks)
-- [x] Recently played (get user's listening history)
-- [ ] Batch operations
-- [ ] Configuration file for preferences
-- [ ] Shell completions (bash/zsh/fish)
+  - [x] Toggle Playback Shuffle
+  - [x] Get Recently Played Tracks
+  - [x] Get the User's Queue
+  - [x] Add Item to Playback Queue
+- [ ] Playlists
+  - [ ] Get Playlist
+  - [ ] Change Playlist Details
+  - [ ] Get Playlist Items
+  - [ ] Update Playlist Items
+  - [ ] Add Items to Playlist
+  - [ ] Remove Playlist Items
+  - [ ] Get Current User's Playlists
+  - [ ] Get User's Playlists
+  - [ ] Create Playlist
+- [ ] Search
+  - [ ] Search for Item
+- [ ] Tracks
+  - [ ] Get Track
+  - [ ] Get Several Tracks
+  - [ ] Get User's Saved Tracks
+  - [ ] Save Tracks for Current User
+  - [ ] Remove User's Saved Tracks
+  - [ ] Check User's Saved Tracks
+- [ ] User
+  - [ ] Get Current User's Profile
+  - [ ] Get User's Top Items
+  - [ ] Get User's Profile
+  - [ ] Follow Playlist
+  - [ ] Unfollow Playlist
+  - [ ] Get Followed Artists
+  - [ ] Follow Artists or Users
+  - [ ] Check if User Follow Artists or Users
+  - [ ] Check if Current User Follows Playlist
 
 ---
 

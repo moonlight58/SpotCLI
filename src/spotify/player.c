@@ -256,7 +256,7 @@ bool spotify_add_to_queue(SpotifyToken *token, const char *uri, const char *devi
     }
 
     char url[512];
-    
+
     if (device_id) {
         snprintf(url, sizeof(url),
                 "https://api.spotify.com/v1/me/player/queue?uri=%s&device_id=%s",

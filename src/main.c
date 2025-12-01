@@ -6,7 +6,6 @@
 #include <string.h>
 #include <getopt.h>
 
-// ===== DÉCLARATIONS DE FONCTIONS =====
 void add_track_to_playlist_interactive(SpotifyToken *token);
 void create_playlist_interactive(SpotifyToken *token);
 void manage_playlist_interactive(SpotifyToken *token);
@@ -69,7 +68,6 @@ void view_and_transfer_devices(SpotifyToken *token) {
     free(devices);
 }
 
-/*
 void print_usage(const char *prog_name) {
     printf("Usage: %s [OPTIONS] \"search query\"\n\n", prog_name);
     printf("Options:\n");
@@ -89,7 +87,6 @@ void print_usage(const char *prog_name) {
     printf("  %s --list\n", prog_name);
     printf("  %s --interactive\n\n", prog_name);
 }
-*/
 
 void print_menu() {
     printf("\n=== spotCLI - Spotify CLI ===\n");
@@ -621,7 +618,6 @@ void interactive_mode(SpotifyToken *token) {
     }
 }
 
-/*
 int main(int argc, char *argv[]) {
     // Load environment variables from .env file
     load_dotenv(".env");
@@ -752,7 +748,6 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
-*/
 
 void create_playlist_interactive(SpotifyToken *token) {
     printf("\n=== Create New Playlist ===\n");

@@ -214,7 +214,7 @@ bool spotify_api_post_empty(SpotifyToken *token, const char *url) {
  * Performs a POST request to Spotify API and returns JSON response
  * Returns parsed JSON object or NULL on error
  */
-struct json_object* spotify_api_post_json(SpotifyToken *token, const char *url, 
+struct json_object* spotify_api_post_json(SpotifyToken *token, const char *url,
                                           const char *json_data) {
     CURL *curl = curl_easy_init();
     if (!curl) return NULL;
