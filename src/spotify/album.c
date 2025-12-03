@@ -149,3 +149,21 @@ SpotifyAlbumList* spotify_get_user_saved_albums(SpotifyToken *token, int limit, 
     json_object_put(root);
     return list;
 }
+
+bool spotify_save_albums(SpotifyToken *token, const chat **album_ids, int count) {
+    // Build JSON Body
+    struct json_object *root = json_object_new_object();
+    struct json_object *ids_array = json_object_new_array();
+
+    for (int i = 0; i < count; i++) {
+        json_object_array_add(ids_array, json_object_new_string(album_ids[i]));
+    }
+
+    json_object_object_add(root, "ids", ids_array);
+    const char *json_str = json_object_to_json_string(root);
+
+    bool result = spotify_api_put(token, "https://api.spotify.com/v1/me/albums", json_str);
+
+    json_object_put(root);
+    return result;
+}
