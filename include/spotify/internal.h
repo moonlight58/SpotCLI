@@ -17,6 +17,7 @@ bool spotify_api_put_empty(SpotifyToken *token, const char *url);
 bool spotify_api_post(SpotifyToken *token, const char *url, const char *json_data);
 bool spotify_api_post_empty(SpotifyToken *token, const char *url);
 struct json_object* spotify_api_post_json(SpotifyToken *token, const char *url, const char *json_data);
+struct json_object* spotify_api_put_json(SpotifyToken *token, const char *url, const char *json_data);
 struct json_object* spotify_api_delete_json(SpotifyToken *token, const char *url, const char *json_data);
 bool spotify_api_delete_empty(SpotifyToken *token, const char *url);
 

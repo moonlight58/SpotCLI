@@ -1,4 +1,4 @@
-#include "spotify/spotify_advanced.h"
+#include "spotify/api/advanced.h"
 
 // ===== USER PROFILE FUNCTIONS =====
 

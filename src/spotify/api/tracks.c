@@ -1,3 +1,8 @@
+#include "spotify/api/tracks.h"
+#include <stdbool.h>
+#include <string.h>
+#include <stdio.h>
+
 SpotifyTrackList* spotify_search_tracks(SpotifyToken *token, const char *query, int limit) {
     char *encoded_query = url_encode(query);
     if (!encoded_query) return NULL;

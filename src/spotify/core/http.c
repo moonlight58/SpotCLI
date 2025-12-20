@@ -1,4 +1,4 @@
-#include "spotify/spotify_internal.h"
+#include "spotify/internal.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

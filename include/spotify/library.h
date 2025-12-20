@@ -1,7 +1,7 @@
 #ifndef SPOTIFY_LIBRARY_H
 #define SPOTIFY_LIBRARY_H
 
-#include "spotify/spotify_internal.h"
+#include "spotify/internal.h"
 #include <stdio.h>
 
 SpotifyTrackList* spotify_get_saved_tracks(SpotifyToken *token, int limit, int offset);

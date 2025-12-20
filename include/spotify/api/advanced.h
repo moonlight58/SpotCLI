@@ -1,7 +1,7 @@
-#ifndef SPOTIFY_ADVANCED_H
-#define SPOTIFY_ADVANCED_H
+#ifndef SPOTIFY_API_ADVANCED_H
+#define SPOTIFY_API_ADVANCED_H
 
-#include "spotify/spotify_internal.h"
+#include "spotify/internal.h"
 
 
 // ===== ALBUM FUNCTIONS =====

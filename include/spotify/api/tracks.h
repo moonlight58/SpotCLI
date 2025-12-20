@@ -1,7 +1,7 @@
-#ifndef SPOTIFY_TRACKS_H
-#define SPOTIFY_TRACKS_H
+#ifndef SPOTIFY_API_TRACKS_H
+#define SPOTIFY_API_TRACKS_H
 
-#include "spotify/spotify_internal.h"
+#include "spotify/internal.h"
 
 // ===== TRACK RETRIEVAL FUNCTIONS =====
 

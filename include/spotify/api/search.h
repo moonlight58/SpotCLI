@@ -1,7 +1,7 @@
-#ifndef SPOTIFY_SEARCH_H
-#define SPOTIFY_SEARCH_H
+#ifndef SPOTIFY_API_SEARCH_H
+#define SPOTIFY_API_SEARCH_H
 
-#include "spotify/spotify_internal.h"
+#include "spotify/internal.h"
 
 SpotifyAlbumList* spotify_get_artist_albums(SpotifyToken *token, const char *artist_id);
 SpotifyArtist* spotify_get_artist(SpotifyToken *token, const char *artist_id);

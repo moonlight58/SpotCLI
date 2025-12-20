@@ -1,5 +1,5 @@
-#include "spotify/spotify_api.h"
-#include "spotify/spotify_advanced.h"
+#include "api.h"
+#include "spotify/api/advanced.h"
 
 void spotify_free_album_list(SpotifyAlbumList *list) {
     if (!list) return;
@@ -145,9 +145,6 @@ void spotify_print_artist(SpotifyArtist *artist, int index) {
     printf("%d. %s\n", index, artist->name);
     printf("   Followers: %d\n", artist->followers);
     printf("   Popularity: %d/100\n", artist->popularity);
-    if (strlen(artist->genres) > 0) {
-        printf("   Genres: %s\n", artist->genres);
-    }
     printf("   ID: %s\n", artist->id);
 }
 

@@ -1,4 +1,4 @@
-#include "spotify/spotify_internal.h"
+#include "spotify/internal.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -97,23 +97,6 @@ void parse_artist_json(struct json_object *item, SpotifyArtist *artist) {
     // Name
     if (json_object_object_get_ex(item, "name", &obj)) {
         strncpy(artist->name, json_object_get_string(obj), sizeof(artist->name) - 1);
-    }
-
-    // Genres
-    struct json_object *genres;
-    if (json_object_object_get_ex(item, "genres", &genres)) {
-        int genre_count = json_object_array_length(genres);
-        char genres_str[512] = {0};
-        for (int j = 0; j < genre_count && j < 5; j++) {
-            struct json_object *genre = json_object_array_get_idx(genres, j);
-            if (j > 0) strcat(genres_str, ", ");
-            strncat(genres_str, json_object_get_string(genre),
-                    sizeof(genres_str) - strlen(genres_str) - 1);
-        }
-        if (genres_str[0] != '\0') {
-            strncpy(artist->genres, genres_str, sizeof(artist->genres) - 1);
-            artist->genres[sizeof(artist->genres) - 1] = '\0';
-        }
     }
 
     // Followers

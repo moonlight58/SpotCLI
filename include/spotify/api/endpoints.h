@@ -1,5 +1,5 @@
-#ifndef SPOTIFY_ENDPOINTS_H
-#define SPOTIFY_ENDPOINTS_H
+#ifndef SPOTIFY_API_ENDPOINTS_H
+#define SPOTIFY_API_ENDPOINTS_H
 
 // Base URL
 #define SPOTIFY_API_BASE "https://api.spotify.com/v1"

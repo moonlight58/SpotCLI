@@ -1,4 +1,5 @@
-#include "spotify/spotify_player.h"
+#include "spotify/api/player.h"
+#include "spotify/api/endpoints.h"
 #include <stdio.h>
 
 static char *context_repeat[] = {"off", "context", "track"};

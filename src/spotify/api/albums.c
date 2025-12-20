@@ -1,4 +1,5 @@
-#include "spotify/advanced.h"
+#include "spotify/api/advanced.h"
+#include <curl/curl.h>
 
 SpotifyAlbumList* spotify_search_albums(SpotifyToken *token, const char *query, int limit) {
     if (!token || !query) {
@@ -221,7 +222,7 @@ SpotifyAlbumList* spotify_get_user_saved_albums(SpotifyToken *token, int limit, 
     return list;
 }
 
-bool spotify_save_albums(SpotifyToken *token, const chat **album_ids, int count) {
+bool spotify_save_albums(SpotifyToken *token, const char **album_ids, int count) {
     // Build JSON Body
     struct json_object *root = json_object_new_object();
     struct json_object *ids_array = json_object_new_array();

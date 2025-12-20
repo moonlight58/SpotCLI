@@ -1,4 +1,4 @@
-#include "spotify/search.h"
+#include "spotify/api/search.h"
 
 SpotifyArtistList* spotify_search_artists(SpotifyToken *token, const char *query, int limit) {
     char *encoded_query = url_encode(query);
