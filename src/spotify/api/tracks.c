@@ -245,8 +245,7 @@ bool spotify_save_tracks(SpotifyToken *token, const char **track_ids, int count)
     json_object_object_add(root, "ids", ids_array);
     const char *json_str = json_object_to_json_string(root);
 
-    bool result = spotify_api_put(token, ENDPOINT_TRACKS, json_str);
-
+    bool result = spotify_api_put(token, ENDPOINT_USER_TRACKS, json_str);
     json_object_put(root);
     return result;
 }

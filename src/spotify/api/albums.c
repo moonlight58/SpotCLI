@@ -235,7 +235,7 @@ bool spotify_save_albums(SpotifyToken *token, const char **album_ids, int count)
     json_object_object_add(root, "ids", ids_array);
     const char *json_str = json_object_to_json_string(root);
 
-    bool result = spotify_api_put(token, ENDPOINT_ALBUMS, json_str);
+    bool result = spotify_api_put(token, ENDPOINT_USER_ALBUMS, json_str);
 
     json_object_put(root);
     return result;
@@ -252,7 +252,7 @@ bool spotify_remove_albums(SpotifyToken *token, const char **album_ids, int coun
         return false;
     }
 
-    const char *url = ENDPOINT_ALBUMS;
+    const char *url = ENDPOINT_USER_ALBUMS;
 
     // Build JSON body
     struct json_object *root = json_object_new_object();

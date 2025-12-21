@@ -65,17 +65,21 @@ SpotifyPlaylistFull* spotify_get_playlist(SpotifyToken *token, const char *playl
 
     char url[512];
     if (fetch_tracks) {
+        char temp_url[512];
+        snprintf(temp_url, sizeof(temp_url), ENDPOINT_PLAYLIST, playlist_id);
         snprintf(url, sizeof(url),
-                 "%s%s?fields=id,name,description,uri,"
-                 "snapshot_id,public,collaborative,owner(id,display_name),"
-                 "tracks(total,items(track(id,name,uri,duration_ms,artists(name),album(name))))"
-                 "&limit=%d",
-                 ENDPOINT_PLAYLIST, playlist_id, track_limit);
+                "%s?fields=id,name,description,uri,"
+                "snapshot_id,public,collaborative,owner(id,display_name),"
+                "tracks(total,items(track(id,name,uri,duration_ms,artists(name),album(name))))"
+                "&limit=%d",
+                temp_url, track_limit);
     } else {
+        char temp_url[512];
+        snprintf(temp_url, sizeof(temp_url), ENDPOINT_PLAYLIST, playlist_id);
         snprintf(url, sizeof(url),
-                 "%s%s?fields=id,name,description,uri,"
-                 "snapshot_id,public,collaborative,owner(id,display_name),tracks(total)",
-                 ENDPOINT_PLAYLIST, playlist_id);
+                "%s?fields=id,name,description,uri,"
+                "snapshot_id,public,collaborative,owner(id,display_name),tracks(total)",
+                temp_url);
     }
 
     struct json_object *root = spotify_api_get(token, url);
@@ -259,7 +263,7 @@ SpotifyPlaylistList* spotify_get_user_playlists(SpotifyToken *token, int limit, 
     char url[256];
     snprintf(url, sizeof(url),
              "%s?limit=%d&offset=%d",
-             ENDPOINT_PLAYLIST, limit, offset);
+             ENDPOINT_USER_PLAYLISTS, limit, offset);
 
     struct json_object *root = spotify_api_get(token, url);
     if (!root) return NULL;
