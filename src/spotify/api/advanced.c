@@ -90,8 +90,8 @@ SpotifyRecentlyPlayed* spotify_get_recently_played(SpotifyToken *token, int limi
 
     char url[256];
     snprintf(url, sizeof(url),
-             "https://api.spotify.com/v1/me/player/recently-played?limit=%d",
-             limit);
+             "%s?limit=%d",
+            ENDPOINT_RECENTLY_PLAYED, limit);
 
     struct json_object *root = spotify_api_get(token, url);
     if (!root) {

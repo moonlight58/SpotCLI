@@ -38,8 +38,8 @@ bool spotify_skip_next_playback(SpotifyToken *token, const char *device_id) {
 
     if (device_id) {
         snprintf(url, sizeof(url),
-                "https://api.spotify.com/v1/me/player/next?device_id=%s",
-                device_id);
+                "%s?device_id=%s",
+                ENDPOINT_PLAYER_NEXT, device_id);
     } else {
         snprintf(url, sizeof(url), ENDPOINT_PLAYER_NEXT);
     }
@@ -52,8 +52,8 @@ bool spotify_skip_previous_playback(SpotifyToken *token, const char *device_id) 
 
     if (device_id) {
         snprintf(url, sizeof(url),
-                "https://api.spotify.com/v1/me/player/previous?device_id=%s",
-                device_id);
+                "%s?device_id=%s",
+                ENDPOINT_PLAYER_PREVIOUS, device_id);
     } else {
         snprintf(url, sizeof(url), ENDPOINT_PLAYER_PREVIOUS);
     }
@@ -90,11 +90,12 @@ bool spotify_toggle_playback_shuffle(SpotifyToken *token, const char *device_id,
 
     if (device_id) {
         snprintf(url, sizeof(url),
-                "https://api.spotify.com/v1/me/player/shuffle?state=%d&device_id=%s",
-                state_shuffle, device_id);
+                "%s?state=%d&device_id=%s",
+                ENDPOINT_PLAYER_SHUFFLE, state_shuffle, device_id);
     } else {
         snprintf(url, sizeof(url),
-                "https://api.spotify.com/v1/me/player/shuffle?state=%d", state_shuffle);
+                "%s?state=%d", 
+                ENDPOINT_PLAYER_SHUFFLE, state_shuffle);
     }
 
     return spotify_api_put_empty(token, url);
@@ -105,12 +106,12 @@ bool spotify_toggle_playback_repeat(SpotifyToken *token, const char *device_id) 
 
     if (device_id) {
         snprintf(url, sizeof(url),
-                "https://api.spotify.com/v1/me/player/repeat?state=%s&device_id=%s",
-                context_repeat[context_index++], device_id);
+                "%s?state=%s&device_id=%s",
+                ENDPOINT_PLAYER_REPEAT, context_repeat[context_index++], device_id);
     } else {
         snprintf(url, sizeof(url),
-                "https://api.spotify.com/v1/me/player/repeat?state=%s",
-                context_repeat[context_index++]);
+                "%s?state=%s",
+                ENDPOINT_PLAYER_REPEAT, context_repeat[context_index++]);
     }
 
     context_index++;
@@ -149,12 +150,12 @@ bool spotify_set_playback_volume(SpotifyToken *token, const char *device_id, int
 
     if (device_id && volume) {
         snprintf(url, sizeof(url),
-                "https://api.spotify.com/v1/me/player/volume?volume_percent=%d&device_id=%s",
-                volume, device_id);
+                "%s?volume_percent=%d&device_id=%s",
+                ENDPOINT_PLAYER_VOLUME, volume, device_id);
     } else {
         snprintf(url, sizeof(url),
-                "https://api.spotify.com/v1/me/player/volume?volume_percent=%d",
-                volume);
+                "%s?volume_percent=%d",
+                ENDPOINT_PLAYER_VOLUME, volume);
     }
     return spotify_api_put_empty(token, url);
 }
@@ -260,12 +261,12 @@ bool spotify_add_to_queue(SpotifyToken *token, const char *uri, const char *devi
 
     if (device_id) {
         snprintf(url, sizeof(url),
-                "https://api.spotify.com/v1/me/player/queue?uri=%s&device_id=%s",
-                uri, device_id);
+                "%s?uri=%s&device_id=%s",
+                ENDPOINT_PLAYER_QUEUE, uri, device_id);
     } else {
         snprintf(url, sizeof(url),
-                "https://api.spotify.com/v1/me/player/queue?uri=%s",
-                uri);
+                "%s?uri=%s",
+                ENDPOINT_PLAYER_QUEUE, uri);
     }
 
     return spotify_api_post_empty(token, url);
@@ -283,8 +284,8 @@ bool spotify_pause_playback(SpotifyToken *token, const char *device_id) {
 
     if (device_id) {
         snprintf(url, sizeof(url),
-                "https://api.spotify.com/v1/me/player/pause?device_id=%s",
-                device_id);
+                "%s?device_id=%s",
+                ENDPOINT_PLAYER_PAUSE, device_id);
     } else {
         snprintf(url, sizeof(url), ENDPOINT_PLAYER_PAUSE);
     }
@@ -304,8 +305,8 @@ bool spotify_resume_playback(SpotifyToken *token, const char *device_id) {
 
     if (device_id) {
         snprintf(url, sizeof(url),
-                 "https://api.spotify.com/v1/me/player/play?device_id=%s",
-                 device_id);
+                 "%s?device_id=%s",
+                 ENDPOINT_PLAYER_PLAY, device_id);
     } else {
         snprintf(url, sizeof(url), ENDPOINT_PLAYER_PLAY);
     }
@@ -329,8 +330,8 @@ bool spotify_start_playback(SpotifyToken *token, const char *device_id,
 
     if (device_id) {
         snprintf(url, sizeof(url),
-                 "https://api.spotify.com/v1/me/player/play?device_id=%s",
-                 device_id);
+                 "%s?device_id=%s",
+                 ENDPOINT_PLAYER_PLAY, device_id);
     } else {
         snprintf(url, sizeof(url), ENDPOINT_PLAYER_PLAY);
     }

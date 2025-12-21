@@ -7,8 +7,8 @@ SpotifyArtistList* spotify_search_artists(SpotifyToken *token, const char *query
 
     char url[512];
     snprintf(url, sizeof(url),
-             "https://api.spotify.com/v1/search?q=%s&type=artist&limit=%d",
-             encoded_query, limit);
+             "%s?q=%s&type=artist&limit=%d",
+             ENDPOINT_SEARCH, encoded_query, limit);
     free(encoded_query);
 
     struct json_object *root = spotify_api_get(token, url);
@@ -78,8 +78,9 @@ SpotifyArtistList* spotify_get_artists(SpotifyToken *token, const char **artist_
     }
 
     // Build URL with query parameters
-    char url[2048] = "https://api.spotify.com/v1/artists?ids=";
-    
+    char url[2048] = "%s?ids=";
+    snprintf(url, sizeof(url), "%s?ids=", ENDPOINT_ARTISTS);
+
     for (int i = 0; i < count; i++) {
         if (i > 0) strcat(url, ",");
         strcat(url, artist_ids[i]);
@@ -134,8 +135,8 @@ SpotifyArtistList* spotify_get_artists(SpotifyToken *token, const char **artist_
 SpotifyAlbumList* spotify_get_artist_albums(SpotifyToken *token, const char *artist_id) {
     char url[256];
     snprintf(url, sizeof(url),
-            "https://api.spotify.com/v1/artists/%s/albums?limit=50&include_groups=album",
-            artist_id);
+            "%s?limit=50&include_groups=album",
+            ENDPOINT_ARTIST_ALBUMS, artist_id);
 
     struct json_object *root = spotify_api_get(token, url);
     if (!root) {
@@ -243,8 +244,8 @@ SpotifyTrackList* spotify_get_artist_top_tracks(SpotifyToken *token, const char 
 
     char url[512];
     snprintf(url, sizeof(url),
-             "https://api.spotify.com/v1/artists/%s/top-tracks?market=%s",
-             artist_id, market);
+             "%s?market=%s",
+             ENDPOINT_ARTIST_TOP_TRACKS, artist_id, market);
 
     struct json_object *root = spotify_api_get(token, url);
     if (!root) return NULL;

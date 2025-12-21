@@ -10,8 +10,8 @@ SpotifyTrackList* spotify_search_tracks(SpotifyToken *token, const char *query, 
 
     char url[512];
     snprintf(url, sizeof(url),
-             "https://api.spotify.com/v1/search?q=%s&type=track&limit=%d",
-             encoded_query, limit);
+             "%s?q=%s&type=track&limit=%d",
+             ENDPOINT_SEARCH, encoded_query, limit);
     free(encoded_query);
 
     struct json_object *root = spotify_api_get(token, url);
@@ -62,8 +62,8 @@ SpotifyTrack* spotify_get_track(SpotifyToken *token, const char *track_id, const
     char url[512];
     if (market) {
         snprintf(url, sizeof(url),
-                 "https://api.spotify.com/v1/tracks/%s?market=%s",
-                 track_id, market);
+                 "%s?market=%s",
+                 ENDPOINT_TRACK, track_id, market);
     } else {
         snprintf(url, sizeof(url),
                  ENDPOINT_TRACK,
@@ -112,7 +112,10 @@ SpotifyTrackList* spotify_get_tracks(SpotifyToken *token, const char **track_ids
     }
 
     // Build URL with query parameters
-    char url[2048] = "https://api.spotify.com/v1/tracks?ids=";
+    char url[2048];
+    snprintf(url, sizeof(url),
+             "%s?ids=",
+             ENDPOINT_TRACKS);
     
     for (int i = 0; i < count; i++) {
         if (i > 0) strcat(url, ",");
@@ -185,8 +188,8 @@ SpotifyTrackList* spotify_get_tracks(SpotifyToken *token, const char **track_ids
 SpotifyTrackList* spotify_get_saved_tracks(SpotifyToken *token, int limit, int offset) {
     char url[256];
     snprintf(url, sizeof(url),
-             "https://api.spotify.com/v1/me/tracks?limit=%d&offset=%d",
-             limit, offset);
+             "%s?limit=%d&offset=%d",
+             ENDPOINT_USER_TRACKS, limit, offset);
 
     struct json_object *root = spotify_api_get(token, url);
     if (!root) return NULL;
@@ -304,8 +307,9 @@ bool* spotify_check_saved_tracks(SpotifyToken *token, const char **track_ids, in
     }
 
     // Build URL with query parameters
-    char url[2048] = "https://api.spotify.com/v1/me/tracks/contains?ids=";
-    
+    char url[2048];
+    snprintf(url, sizeof(url), "%s/contains?ids=", ENDPOINT_USER_TRACKS);
+
     for (int i = 0; i < count; i++) {
         if (i > 0) strcat(url, ",");
         strcat(url, track_ids[i]);

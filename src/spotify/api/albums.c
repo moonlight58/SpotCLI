@@ -16,8 +16,8 @@ SpotifyAlbumList* spotify_search_albums(SpotifyToken *token, const char *query, 
 
     char url[512];
     snprintf(url, sizeof(url),
-             "https://api.spotify.com/v1/search?q=%s&type=album&limit=%d",
-             encoded_query, limit);
+             "%s?q=%s&type=album&limit=%d",
+            ENDPOINT_SEARCH, encoded_query, limit);
     free(encoded_query);
 
     struct json_object *root = spotify_api_get(token, url);
@@ -162,8 +162,8 @@ SpotifyAlbumList* spotify_get_user_saved_albums(SpotifyToken *token, int limit, 
 
     char url[256];
     snprintf(url, sizeof(url),
-             "https://api.spotify.com/v1/me/albums?limit=%d&offset=%d",
-             limit, offset);
+             "%s?limit=%d&offset=%d",
+            ENDPOINT_USER_ALBUMS, limit, offset);
 
     struct json_object *root = spotify_api_get(token, url);
     if (!root) {
@@ -320,7 +320,8 @@ bool* spotify_check_saved_albums(SpotifyToken *token, const char **album_ids, in
     }
 
     // Build URL with query parameters
-    char url[2048] = "https://api.spotify.com/v1/me/albums/contains?ids=";
+    char url[2048];
+    snprintf(url, sizeof(url), "%s?ids=", ENDPOINT_CHECK_ALBUMS);
     
     for (int i = 0; i < count; i++) {
         if (i > 0) strcat(url, ",");

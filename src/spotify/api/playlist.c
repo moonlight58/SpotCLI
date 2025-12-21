@@ -66,16 +66,16 @@ SpotifyPlaylistFull* spotify_get_playlist(SpotifyToken *token, const char *playl
     char url[512];
     if (fetch_tracks) {
         snprintf(url, sizeof(url),
-                 "https://api.spotify.com/v1/playlists/%s?fields=id,name,description,uri,"
+                 "%s?fields=id,name,description,uri,"
                  "snapshot_id,public,collaborative,owner(id,display_name),"
                  "tracks(total,items(track(id,name,uri,duration_ms,artists(name),album(name))))"
                  "&limit=%d",
-                 playlist_id, track_limit);
+                 ENDPOINT_PLAYLIST, playlist_id, track_limit);
     } else {
         snprintf(url, sizeof(url),
-                 "https://api.spotify.com/v1/playlists/%s?fields=id,name,description,uri,"
+                 "%s?fields=id,name,description,uri,"
                  "snapshot_id,public,collaborative,owner(id,display_name),tracks(total)",
-                 playlist_id);
+                 ENDPOINT_PLAYLIST, playlist_id);
     }
 
     struct json_object *root = spotify_api_get(token, url);
@@ -258,8 +258,8 @@ bool spotify_unfollow_playlist(SpotifyToken *token, const char *playlist_id) {
 SpotifyPlaylistList* spotify_get_user_playlists(SpotifyToken *token, int limit, int offset) {
     char url[256];
     snprintf(url, sizeof(url),
-             "https://api.spotify.com/v1/me/playlists?limit=%d&offset=%d",
-             limit, offset);
+             "%s?limit=%d&offset=%d",
+             ENDPOINT_PLAYLIST, limit, offset);
 
     struct json_object *root = spotify_api_get(token, url);
     if (!root) return NULL;
