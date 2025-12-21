@@ -18,7 +18,7 @@ SpotifyPlaylistFull* spotify_create_playlist(SpotifyToken *token, const char *na
     }
 
     char url[256];
-    snprintf(url, sizeof(url), "https://api.spotify.com/v1/users/%s/playlists", user_id);
+    snprintf(url, sizeof(url), ENDPOINT_USER_PLAYLISTS_BY_ID, user_id);
     free(user_id);
 
     // Build JSON body
@@ -66,14 +66,14 @@ SpotifyPlaylistFull* spotify_get_playlist(SpotifyToken *token, const char *playl
     char url[512];
     if (fetch_tracks) {
         snprintf(url, sizeof(url),
-                 "%s?fields=id,name,description,uri,"
+                 "%s%s?fields=id,name,description,uri,"
                  "snapshot_id,public,collaborative,owner(id,display_name),"
                  "tracks(total,items(track(id,name,uri,duration_ms,artists(name),album(name))))"
                  "&limit=%d",
                  ENDPOINT_PLAYLIST, playlist_id, track_limit);
     } else {
         snprintf(url, sizeof(url),
-                 "%s?fields=id,name,description,uri,"
+                 "%s%s?fields=id,name,description,uri,"
                  "snapshot_id,public,collaborative,owner(id,display_name),tracks(total)",
                  ENDPOINT_PLAYLIST, playlist_id);
     }
