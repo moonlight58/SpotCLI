@@ -79,24 +79,6 @@ void spotify_free_user_profile(SpotifyUserProfile *profile) {
     free(profile);
 }
 
-void spotify_free_audio_features(SpotifyAudioFeatures *features) {
-    if (!features) return;
-    free(features);
-}
-
-void spotify_free_audio_features_batch(SpotifyAudioFeatures *features, int count) {
-    if (!features) return;
-    free(features);
-}
-
-void spotify_free_recommendations(SpotifyRecommendations *recommendations) {
-    if (!recommendations) return;
-    if (recommendations->tracks) {
-        free(recommendations->tracks);
-    }
-    free(recommendations);
-}
-
 void spotify_free_recently_played(SpotifyRecentlyPlayed *history) {
     if (!history) return;
     if (history->history) {
@@ -147,32 +129,6 @@ void spotify_print_artist(SpotifyArtist *artist, int index) {
     printf("   Popularity: %d/100\n", artist->popularity);
     printf("   ID: %s\n", artist->id);
 }
-
-void spotify_print_audio_features(SpotifyAudioFeatures *features) {
-    if (!features) {
-        printf("No audio features available\n");
-        return;
-    }
-
-    printf("\n╔════════════════════════════════════════════════════════════════╗\n");
-    printf("║                    AUDIO FEATURES                              ║\n");
-    printf("╠════════════════════════════════════════════════════════════════╣\n");
-    printf("║ Track ID: %s\n", features->track_id);
-    printf("║\n");
-    printf("║ Acousticness:      %.2f/1.00  (acoustic intensity)\n", features->acousticness);
-    printf("║ Danceability:      %.2f/1.00  (suitable for dancing)\n", features->danceability);
-    printf("║ Energy:            %.2f/1.00  (intensity and activity)\n", features->energy);
-    printf("║ Instrumentalness:  %.2f/1.00  (lack of vocals)\n", features->instrumentalness);
-    printf("║ Liveness:          %.2f/1.00  (live performance)\n", features->liveness);
-    printf("║ Loudness:          %.2f dB   (overall loudness)\n", features->loudness);
-    printf("║ Speechiness:       %.2f/1.00  (spoken words)\n", features->speechiness);
-    printf("║ Valence:           %.2f/1.00  (musical positiveness)\n", features->valence);
-    printf("║ Tempo:             %d BPM\n", features->tempo);
-    printf("║ Time Signature:    %d/4\n", features->time_signature);
-    printf("╚════════════════════════════════════════════════════════════════╝\n");
-}
-
-
 
 void spotify_print_device(SpotifyDevice *device, int index) {
     printf("%d. %s\n", index, device->device_name);
@@ -350,31 +306,6 @@ void spotify_print_recently_played(SpotifyRecentlyPlayed *history) {
                history->history[i].played_at);
 
         if (i < history->count - 1 && i < 49) printf("║\n");
-    }
-
-    printf("╚════════════════════════════════════════════════════════════════╝\n");
-}
-
-void spotify_print_recommendations(SpotifyRecommendations *recommendations) {
-    if (!recommendations) {
-        printf("No recommendations available\n");
-        return;
-    }
-
-    printf("\n╔════════════════════════════════════════════════════════════════╗\n");
-    printf("║                   RECOMMENDATIONS                              ║\n");
-    printf("╠════════════════════════════════════════════════════════════════╣\n");
-    printf("║ Found %d recommendations:\n", recommendations->count);
-    printf("║\n");
-
-    for (int i = 0; i < recommendations->count && i < 50; i++) {
-        printf("║ %d. %s\n", i + 1, recommendations->tracks[i].name);
-        printf("║    Artist: %s", recommendations->tracks[i].artist);
-        int dur_min = recommendations->tracks[i].duration_ms / 60000;
-        int dur_sec = (recommendations->tracks[i].duration_ms / 1000) % 60;
-        printf(" (%d:%02d)\n", dur_min, dur_sec);
-
-        if (i < recommendations->count - 1 && i < 49) printf("║\n");
     }
 
     printf("╚════════════════════════════════════════════════════════════════╝\n");

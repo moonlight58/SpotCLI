@@ -24,9 +24,6 @@
 #define ENDPOINT_TRACKS             SPOTIFY_API_BASE "/tracks"
 #define ENDPOINT_USER_TRACKS        SPOTIFY_API_BASE "/me/tracks"
 #define ENDPOINT_CHECK_TRACKS       SPOTIFY_API_BASE "/me/tracks/contains"
-#define ENDPOINT_AUDIO_FEATURES     SPOTIFY_API_BASE "/audio-features/%s"
-#define ENDPOINT_AUDIO_FEATURES_BATCH SPOTIFY_API_BASE "/audio-features"
-#define ENDPOINT_AUDIO_ANALYSIS     SPOTIFY_API_BASE "/audio-analysis/%s"
 
 // Player endpoints
 #define ENDPOINT_PLAYER             SPOTIFY_API_BASE "/me/player"
@@ -64,10 +61,6 @@
 #define ENDPOINT_CATEGORY           SPOTIFY_API_BASE "/browse/categories/%s"
 #define ENDPOINT_CATEGORY_PLAYLISTS SPOTIFY_API_BASE "/browse/categories/%s/playlists"
 
-// Recommendations
-#define ENDPOINT_RECOMMENDATIONS    SPOTIFY_API_BASE "/recommendations"
-#define ENDPOINT_RECOMMENDATION_GENRES SPOTIFY_API_BASE "/recommendations/available-genre-seeds"
-
 // API Limits
 #define SPOTIFY_MAX_LIMIT_TRACKS        50
 #define SPOTIFY_MAX_LIMIT_ALBUMS        50
@@ -75,7 +68,6 @@
 #define SPOTIFY_MAX_LIMIT_PLAYLISTS     50
 #define SPOTIFY_MAX_LIMIT_QUEUE         50
 #define SPOTIFY_MAX_LIMIT_SEARCH        50
-#define SPOTIFY_MAX_LIMIT_RECOMMENDATIONS 100
 
 #define SPOTIFY_MAX_BATCH_TRACKS        100
 #define SPOTIFY_MAX_BATCH_ALBUMS        50

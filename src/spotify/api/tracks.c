@@ -1,4 +1,5 @@
 #include "spotify/api/tracks.h"
+#include "spotify/api/endpoints.h"
 #include <stdbool.h>
 #include <string.h>
 #include <stdio.h>
@@ -65,7 +66,7 @@ SpotifyTrack* spotify_get_track(SpotifyToken *token, const char *track_id, const
                  track_id, market);
     } else {
         snprintf(url, sizeof(url),
-                 "https://api.spotify.com/v1/tracks/%s",
+                 ENDPOINT_TRACK,
                  track_id);
     }
 
@@ -241,7 +242,7 @@ bool spotify_save_tracks(SpotifyToken *token, const char **track_ids, int count)
     json_object_object_add(root, "ids", ids_array);
     const char *json_str = json_object_to_json_string(root);
 
-    bool result = spotify_api_put(token, "https://api.spotify.com/v1/me/tracks", json_str);
+    bool result = spotify_api_put(token, ENDPOINT_TRACKS, json_str);
 
     json_object_put(root);
     return result;
@@ -261,7 +262,7 @@ bool spotify_remove_tracks(SpotifyToken *token, const char **track_ids, int coun
         return false;
     }
 
-    const char *url = "https://api.spotify.com/v1/me/tracks";
+    const char *url = ENDPOINT_USER_TRACKS;
 
     // Build JSON body
     struct json_object *root = json_object_new_object();

@@ -103,7 +103,7 @@ bool spotify_update_playlist(SpotifyToken *token, const char *playlist_id, Spoti
     }
 
     char url[256];
-    snprintf(url, sizeof(url), "https://api.spotify.com/v1/playlists/%s", playlist_id);
+    snprintf(url, sizeof(url), ENDPOINT_PLAYLIST, playlist_id);
 
     // Build JSON body with only non-NULL fields
     struct json_object *body = json_object_new_object();
@@ -142,7 +142,7 @@ SpotifyPlaylistResult* spotify_add_tracks_to_playlist(SpotifyToken *token, const
     }
 
     char url[256];
-    snprintf(url, sizeof(url), "https://api.spotify.com/v1/playlists/%s/tracks", playlist_id);
+    snprintf(url, sizeof(url), ENDPOINT_PLAYLIST_TRACKS, playlist_id);
 
     // Build JSON body
     struct json_object *body = json_object_new_object();
@@ -197,7 +197,7 @@ SpotifyPlaylistResult* spotify_remove_tracks_from_playlist(SpotifyToken *token, 
     }
 
     char url[256];
-    snprintf(url, sizeof(url), "https://api.spotify.com/v1/playlists/%s/tracks", playlist_id);
+    snprintf(url, sizeof(url), ENDPOINT_PLAYLIST_TRACKS, playlist_id);
 
     // Build JSON body
     struct json_object *body = json_object_new_object();
@@ -250,7 +250,7 @@ bool spotify_unfollow_playlist(SpotifyToken *token, const char *playlist_id) {
     char url[256];
 
     snprintf(url, sizeof(url),
-            "https://api.spotify.com/v1/playlists/%s/followers",
+            ENDPOINT_PLAYLIST_FOLLOWERS,
             playlist_id);
     return spotify_api_delete_empty(token, url);
 }

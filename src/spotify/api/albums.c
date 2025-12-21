@@ -1,4 +1,5 @@
 #include "spotify/api/advanced.h"
+#include "spotify/api/endpoints.h"
 #include <curl/curl.h>
 
 SpotifyAlbumList* spotify_search_albums(SpotifyToken *token, const char *query, int limit) {
@@ -80,7 +81,7 @@ SpotifyAlbumDetailed* spotify_get_album(SpotifyToken *token, const char *album_i
 
     char url[512];
     snprintf(url, sizeof(url),
-             "https://api.spotify.com/v1/albums/%s", album_id);
+             ENDPOINT_ALBUM, album_id);
 
     struct json_object *root = spotify_api_get(token, url);
     if (!root) {
@@ -234,7 +235,7 @@ bool spotify_save_albums(SpotifyToken *token, const char **album_ids, int count)
     json_object_object_add(root, "ids", ids_array);
     const char *json_str = json_object_to_json_string(root);
 
-    bool result = spotify_api_put(token, "https://api.spotify.com/v1/me/albums", json_str);
+    bool result = spotify_api_put(token, ENDPOINT_ALBUMS, json_str);
 
     json_object_put(root);
     return result;
@@ -251,7 +252,7 @@ bool spotify_remove_albums(SpotifyToken *token, const char **album_ids, int coun
         return false;
     }
 
-    const char *url = "https://api.spotify.com/v1/me/albums";
+    const char *url = ENDPOINT_ALBUMS;
 
     // Build JSON body
     struct json_object *root = json_object_new_object();

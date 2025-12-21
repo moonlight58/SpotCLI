@@ -6,7 +6,7 @@ static char *context_repeat[] = {"off", "context", "track"};
 static int context_index = 0;
 
 SpotifyPlayerState* spotify_get_player_state(SpotifyToken *token) {
-    const char *url = "https://api.spotify.com/v1/me/player";
+    const char *url = ENDPOINT_PLAYER;
 
     struct json_object *root = spotify_api_get(token, url);
     if (!root) {
@@ -41,7 +41,7 @@ bool spotify_skip_next_playback(SpotifyToken *token, const char *device_id) {
                 "https://api.spotify.com/v1/me/player/next?device_id=%s",
                 device_id);
     } else {
-        snprintf(url, sizeof(url), "https://api.spotify.com/v1/me/player/next");
+        snprintf(url, sizeof(url), ENDPOINT_PLAYER_NEXT);
     }
 
     return spotify_api_post_empty(token, url);
@@ -55,7 +55,7 @@ bool spotify_skip_previous_playback(SpotifyToken *token, const char *device_id) 
                 "https://api.spotify.com/v1/me/player/previous?device_id=%s",
                 device_id);
     } else {
-        snprintf(url, sizeof(url), "https://api.spotify.com/v1/me/player/previous");
+        snprintf(url, sizeof(url), ENDPOINT_PLAYER_PREVIOUS);
     }
 
     return spotify_api_post_empty(token, url);
@@ -126,7 +126,7 @@ bool spotify_transfer_playback(SpotifyToken *token, const char *device_id, bool 
         return false;
     }
 
-    const char *url = "https://api.spotify.com/v1/me/player";
+    const char *url = ENDPOINT_PLAYER;
 
     // Build JSON body
     struct json_object *root = json_object_new_object();
@@ -170,7 +170,7 @@ SpotifyDevice* spotify_get_available_devices(SpotifyToken *token, int *device_co
 
     *device_count = 0;
 
-    const char *url = "https://api.spotify.com/v1/me/player/devices";
+    const char *url = ENDPOINT_PLAYER_DEVICES;
 
     struct json_object *root = spotify_api_get(token, url);
     if (!root) {
@@ -219,7 +219,7 @@ SpotifyQueue* spotify_get_queue(SpotifyToken *token) {
         return NULL;
     }
 
-    const char *url = "https://api.spotify.com/v1/me/player/queue";
+    const char *url = ENDPOINT_PLAYER_QUEUE;
 
     struct json_object *root = spotify_api_get(token, url);
     if (!root) {
@@ -286,7 +286,7 @@ bool spotify_pause_playback(SpotifyToken *token, const char *device_id) {
                 "https://api.spotify.com/v1/me/player/pause?device_id=%s",
                 device_id);
     } else {
-        snprintf(url, sizeof(url), "https://api.spotify.com/v1/me/player/pause");
+        snprintf(url, sizeof(url), ENDPOINT_PLAYER_PAUSE);
     }
 
     return spotify_api_put_empty(token, url);
@@ -307,7 +307,7 @@ bool spotify_resume_playback(SpotifyToken *token, const char *device_id) {
                  "https://api.spotify.com/v1/me/player/play?device_id=%s",
                  device_id);
     } else {
-        snprintf(url, sizeof(url), "https://api.spotify.com/v1/me/player/play");
+        snprintf(url, sizeof(url), ENDPOINT_PLAYER_PLAY);
     }
 
     return spotify_api_post(token, url, NULL);
@@ -332,7 +332,7 @@ bool spotify_start_playback(SpotifyToken *token, const char *device_id,
                  "https://api.spotify.com/v1/me/player/play?device_id=%s",
                  device_id);
     } else {
-        snprintf(url, sizeof(url), "https://api.spotify.com/v1/me/player/play");
+        snprintf(url, sizeof(url), ENDPOINT_PLAYER_PLAY);
     }
 
     // Build JSON body if context_uri or uris are provided

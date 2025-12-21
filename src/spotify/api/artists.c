@@ -1,4 +1,5 @@
 #include "spotify/api/search.h"
+#include "spotify/api/endpoints.h"
 
 SpotifyArtistList* spotify_search_artists(SpotifyToken *token, const char *query, int limit) {
     char *encoded_query = url_encode(query);
@@ -49,7 +50,7 @@ SpotifyArtist* spotify_get_artist(SpotifyToken *token, const char *artist_id) {
 
     char url[256];
     snprintf(url, sizeof(url),
-             "https://api.spotify.com/v1/artists/%s",
+             ENDPOINT_ARTIST,
              artist_id);
 
     struct json_object *root = spotify_api_get(token, url);

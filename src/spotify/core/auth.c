@@ -1,9 +1,10 @@
 #include "spotify/internal.h"
+#include "spotify/api/endpoints.h"
 #include <string.h>
 #include <stdlib.h>
 
 char* spotify_get_current_user_id(SpotifyToken *token) {
-    const char *url = "https://api.spotify.com/v1/me";
+    const char *url = ENDPOINT_CURRENT_USER;
 
     struct json_object *root = spotify_api_get(token, url);
     if (!root) return NULL;

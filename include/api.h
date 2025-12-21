@@ -157,28 +157,6 @@ typedef struct {
     char profile_image_url[512];
 } SpotifyUserProfile;
 
-// Audio Features
-typedef struct {
-    char track_id[64];
-    char track_name[256];
-    float acousticness;
-    float danceability;
-    float energy;
-    float instrumentalness;
-    float liveness;
-    float loudness;
-    float speechiness;
-    float valence;
-    int tempo;
-    int time_signature;
-} SpotifyAudioFeatures;
-
-// Recommendations
-typedef struct {
-    SpotifyTrack *tracks;
-    int count;
-} SpotifyRecommendations;
-
 // Recently Played
 typedef struct {
     SpotifyTrack track;
@@ -218,9 +196,6 @@ SpotifyAlbumDetailed* spotify_get_album(SpotifyToken *token, const char *album_i
 SpotifyAlbumList* spotify_search_albums(SpotifyToken *token, const char *query, int limit);
 SpotifyUserProfile* spotify_get_current_user_profile(SpotifyToken *token);
 SpotifyUserProfile* spotify_get_user_profile(SpotifyToken *token, const char *user_id);
-SpotifyAudioFeatures* spotify_get_audio_features(SpotifyToken *token, const char *track_id);
-SpotifyAudioFeatures* spotify_get_audio_features_batch(SpotifyToken *token, const char **track_ids, int count);
-SpotifyRecommendations* spotify_get_recommendations(SpotifyToken *token, const char **seed_tracks, const char **seed_artists, const char **seed_genres, int seed_count, int limit);
 SpotifyRecentlyPlayed* spotify_get_recently_played(SpotifyToken *token, int limit);
 
 
@@ -229,15 +204,12 @@ void spotify_free_album_detailed(SpotifyAlbumDetailed *album);
 void spotify_free_album_list(SpotifyAlbumList *list);
 void spotify_free_artist(SpotifyArtist *artist);
 void spotify_free_artist_list(SpotifyArtistList *list);
-void spotify_free_audio_features(SpotifyAudioFeatures *features);
-void spotify_free_audio_features_batch(SpotifyAudioFeatures *features, int count);
 void spotify_free_player_state(SpotifyPlayerState *state);
 void spotify_free_playlist_full(SpotifyPlaylistFull *playlist);
 void spotify_free_playlist_list(SpotifyPlaylistList *list);
 void spotify_free_playlist_result(SpotifyPlaylistResult *result);
 void spotify_free_queue(SpotifyQueue *queue);
 void spotify_free_recently_played(SpotifyRecentlyPlayed *history);
-void spotify_free_recommendations(SpotifyRecommendations *recommendations);
 void spotify_free_track(SpotifyTrack *track);
 void spotify_free_track_list(SpotifyTrackList *list);
 void spotify_free_user_profile(SpotifyUserProfile *profile);
@@ -246,14 +218,12 @@ void spotify_free_user_profile(SpotifyUserProfile *profile);
 void spotify_print_album(SpotifyAlbum *album, int index);
 void spotify_print_album_detailed(SpotifyAlbumDetailed *album);
 void spotify_print_artist(SpotifyArtist *artist, int index);
-void spotify_print_audio_features(SpotifyAudioFeatures *features);
 void spotify_print_device(SpotifyDevice *device, int index);
 void spotify_print_player_state(SpotifyPlayerState *state);
 void spotify_print_playlist(SpotifyPlaylist *playlist, int index);
 void spotify_print_playlist_full(SpotifyPlaylistFull *playlist);
 void spotify_print_queue(SpotifyQueue *queue);
 void spotify_print_recently_played(SpotifyRecentlyPlayed *history);
-void spotify_print_recommendations(SpotifyRecommendations *recommendations);
 void spotify_print_track(SpotifyTrack *track, int index);
 void spotify_print_user_profile(SpotifyUserProfile *profile);
 
