@@ -89,25 +89,60 @@ void print_usage(const char *prog_name) {
 }
 
 void print_menu() {
-    printf("\n=== spotCLI - Spotify CLI ===\n");
-    printf("1. Exit\n");
-    printf("2. Options\n");
-    printf("3. View saved tracks\n");
-    printf("4. Search for artists\n");
-    printf("5. Search for tracks\n");
-    printf("6. View artist's top tracks\n");
-    printf("7. View artist's albums\n");
-    printf("8. View your playlists\n");
-    printf("9. View playback queue\n");
-    printf("10. Add track to queue\n");
-    printf("11. Add artist track to queue\n");
-    printf("── Playlist Management ──\n");
-    printf("12. Create new playlist\n");
-    printf("13. Manage playlist (edit details)\n");
-    printf("14. Add track to playlist\n");
-    printf("15. Remove track from playlist\n");
-    printf("16. Unfollow playlist\n");
-    printf("Choose an option: ");
+    printf("\n╔════════════════════════════════════════════════════════════════╗\n");
+    printf("║                    spotCLI - Spotify CLI                       ║\n");
+    printf("╠════════════════════════════════════════════════════════════════╣\n");
+    printf("║  GENERAL                                                       ║\n");
+    printf("║  1.  Exit                                                      ║\n");
+    printf("║  2.  View current user profile                                 ║\n");
+    printf("║                                                                ║\n");
+    printf("║  LIBRARY                                                       ║\n");
+    printf("║  3.  View saved tracks                                         ║\n");
+    printf("║  4.  Remove track from library                                 ║\n");
+    printf("║  5.  Check if track is saved                                   ║\n");
+    printf("║  6.  View saved albums                                         ║\n");
+    printf("║  7.  Save album to library                                     ║\n");
+    printf("║  8.  Remove album from library                                 ║\n");
+    printf("║  9.  Check if album is saved                                   ║\n");
+    printf("║                                                                ║\n");
+    printf("║  SEARCH                                                        ║\n");
+    printf("║  10. Search tracks                                             ║\n");
+    printf("║  11. Search artists                                            ║\n");
+    printf("║  12. Search albums                                             ║\n");
+    printf("║  13. View artist's albums                                      ║\n");
+    printf("║  14. View artist's top tracks                                  ║\n");
+    printf("║  15. View album details                                        ║\n");
+    printf("║                                                                ║\n");
+    printf("║  PLAYLISTS                                                     ║\n");
+    printf("║  16. View your playlists                                       ║\n");
+    printf("║  17. View playlist details                                     ║\n");
+    printf("║  18. Create playlist                                           ║\n");
+    printf("║  19. Edit playlist details                                     ║\n");
+    printf("║  20. Add track to playlist                                     ║\n");
+    printf("║  21. Remove track from playlist                                ║\n");
+    printf("║  22. Reorder playlist tracks                                   ║\n");
+    printf("║  23. Unfollow playlist                                         ║\n");
+    printf("║                                                                ║\n");
+    printf("║  PLAYER                                                        ║\n");
+    printf("║  24. View player state                                         ║\n");
+    printf("║  25. View currently playing                                    ║\n");
+    printf("║  26. View recently played                                      ║\n");
+    printf("║  27. Play/Pause (toggle)                                       ║\n");
+    printf("║  28. Next track                                                ║\n");
+    printf("║  29. Previous track                                            ║\n");
+    printf("║  30. Toggle shuffle                                            ║\n");
+    printf("║  31. Cycle repeat mode                                         ║\n");
+    printf("║  32. Set volume                                                ║\n");
+    printf("║  33. Seek to position                                          ║\n");
+    printf("║  34. View available devices                                    ║\n");
+    printf("║  35. Transfer playback to device                               ║\n");
+    printf("║                                                                ║\n");
+    printf("║  QUEUE                                                         ║\n");
+    printf("║  36. View queue                                                ║\n");
+    printf("║  37. Add track to queue                                        ║\n");
+    printf("║  38. Add artist track to queue                                 ║\n");
+    printf("╚════════════════════════════════════════════════════════════════╝\n");
+    printf("\nChoose an option: ");
 }
 
 void search_artists(SpotifyToken *token, const char *query) {
@@ -523,29 +558,595 @@ void users_options() {
     printf("\n");
 }
 
+void view_current_user_profile(SpotifyToken *token) {
+    printf("\nFetching your profile...\n");
+    
+    SpotifyUserProfile *profile = spotify_get_current_user_profile(token);
+    
+    if (!profile) {
+        printf("Failed to get profile.\n");
+        return;
+    }
+    
+    spotify_print_user_profile(profile);
+    spotify_free_user_profile(profile);
+}
+
+void remove_track_from_library_interactive(SpotifyToken *token) {
+    printf("\n=== Remove Track from Library ===\n");
+    printf("Enter track name to search: ");
+    
+    char query[256];
+    if (!fgets(query, sizeof(query), stdin)) {
+        printf("Invalid input.\n");
+        return;
+    }
+    query[strcspn(query, "\n")] = '\0';
+    
+    SpotifyTrackList *tracks = spotify_search_tracks(token, query, 10);
+    
+    if (!tracks || tracks->count == 0) {
+        printf("No tracks found.\n");
+        if (tracks) spotify_free_track_list(tracks);
+        return;
+    }
+    
+    printf("\nFound tracks:\n\n");
+    for (int i = 0; i < tracks->count; i++) {
+        spotify_print_track(&tracks->tracks[i], i + 1);
+        printf("\n");
+    }
+    
+    printf("Enter track number to remove (or 0 to cancel): ");
+    int choice;
+    if (scanf("%d", &choice) != 1 || choice <= 0 || choice > tracks->count) {
+        spotify_free_track_list(tracks);
+        getchar();
+        return;
+    }
+    getchar();
+    
+    const char *track_id = tracks->tracks[choice - 1].id;
+    const char *track_name = tracks->tracks[choice - 1].name;
+    
+    printf("Removing '%s' from library...\n", track_name);
+    
+    const char *ids[] = { track_id };
+    if (spotify_remove_tracks(token, ids, 1)) {
+        printf("✅ Track removed from library!\n");
+    } else {
+        printf("❌ Failed to remove track.\n");
+    }
+    
+    spotify_free_track_list(tracks);
+}
+
+void check_track_saved_interactive(SpotifyToken *token) {
+    printf("\n=== Check if Track is Saved ===\n");
+    printf("Enter track name to search: ");
+    
+    char query[256];
+    if (!fgets(query, sizeof(query), stdin)) {
+        printf("Invalid input.\n");
+        return;
+    }
+    query[strcspn(query, "\n")] = '\0';
+    
+    SpotifyTrackList *tracks = spotify_search_tracks(token, query, 10);
+    
+    if (!tracks || tracks->count == 0) {
+        printf("No tracks found.\n");
+        if (tracks) spotify_free_track_list(tracks);
+        return;
+    }
+    
+    printf("\nFound tracks:\n\n");
+    for (int i = 0; i < tracks->count; i++) {
+        spotify_print_track(&tracks->tracks[i], i + 1);
+        printf("\n");
+    }
+    
+    printf("Enter track number to check (or 0 to cancel): ");
+    int choice;
+    if (scanf("%d", &choice) != 1 || choice <= 0 || choice > tracks->count) {
+        spotify_free_track_list(tracks);
+        getchar();
+        return;
+    }
+    getchar();
+    
+    const char *track_id = tracks->tracks[choice - 1].id;
+    const char *track_name = tracks->tracks[choice - 1].name;
+    
+    printf("Checking if '%s' is saved...\n", track_name);
+    
+    if (spotify_is_track_saved(token, track_id)) {
+        printf("✅ Track is in your library!\n");
+    } else {
+        printf("❌ Track is not in your library.\n");
+    }
+    
+    spotify_free_track_list(tracks);
+}
+
+void view_saved_albums_interactive(SpotifyToken *token) {
+    printf("\nFetching your saved albums...\n");
+    
+    SpotifyAlbumList *albums = spotify_get_user_saved_albums(token, 20, 0);
+    
+    if (!albums || albums->count == 0) {
+        printf("No saved albums found.\n");
+        if (albums) spotify_free_album_list(albums);
+        return;
+    }
+    
+    printf("\nYou have %d saved albums (showing first %d)\n\n",
+            albums->total, albums->count);
+    
+    for (int i = 0; i < albums->count; i++) {
+        spotify_print_album(&albums->albums[i], i + 1);
+        printf("\n");
+    }
+    
+    spotify_free_album_list(albums);
+}
+
+void save_album_interactive(SpotifyToken *token) {
+    printf("\n=== Save Album to Library ===\n");
+    printf("Enter album name to search: ");
+    
+    char query[256];
+    if (!fgets(query, sizeof(query), stdin)) {
+        printf("Invalid input.\n");
+        return;
+    }
+    query[strcspn(query, "\n")] = '\0';
+    
+    SpotifyAlbumList *albums = spotify_search_albums(token, query, 10);
+    
+    if (!albums || albums->count == 0) {
+        printf("No albums found.\n");
+        if (albums) spotify_free_album_list(albums);
+        return;
+    }
+    
+    printf("\nFound albums:\n\n");
+    for (int i = 0; i < albums->count; i++) {
+        spotify_print_album(&albums->albums[i], i + 1);
+        printf("\n");
+    }
+    
+    printf("Enter album number to save (or 0 to cancel): ");
+    int choice;
+    if (scanf("%d", &choice) != 1 || choice <= 0 || choice > albums->count) {
+        spotify_free_album_list(albums);
+        getchar();
+        return;
+    }
+    getchar();
+    
+    const char *album_id = albums->albums[choice - 1].id;
+    const char *album_name = albums->albums[choice - 1].name;
+    
+    printf("Saving '%s' to library...\n", album_name);
+    
+    const char *ids[] = { album_id };
+    if (spotify_save_albums(token, ids, 1)) {
+        printf("✅ Album saved to library!\n");
+    } else {
+        printf("❌ Failed to save album.\n");
+    }
+    
+    spotify_free_album_list(albums);
+}
+
+void remove_album_interactive(SpotifyToken *token) {
+    printf("\n=== Remove Album from Library ===\n");
+    
+    // Show saved albums first
+    SpotifyAlbumList *albums = spotify_get_user_saved_albums(token, 20, 0);
+    
+    if (!albums || albums->count == 0) {
+        printf("No saved albums found.\n");
+        if (albums) spotify_free_album_list(albums);
+        return;
+    }
+    
+    printf("\nYour saved albums:\n\n");
+    for (int i = 0; i < albums->count; i++) {
+        spotify_print_album(&albums->albums[i], i + 1);
+        printf("\n");
+    }
+    
+    printf("Enter album number to remove (or 0 to cancel): ");
+    int choice;
+    if (scanf("%d", &choice) != 1 || choice <= 0 || choice > albums->count) {
+        spotify_free_album_list(albums);
+        getchar();
+        return;
+    }
+    getchar();
+    
+    const char *album_id = albums->albums[choice - 1].id;
+    const char *album_name = albums->albums[choice - 1].name;
+    
+    printf("Removing '%s' from library...\n", album_name);
+    
+    const char *ids[] = { album_id };
+    if (spotify_remove_albums(token, ids, 1)) {
+        printf("✅ Album removed from library!\n");
+    } else {
+        printf("❌ Failed to remove album.\n");
+    }
+    
+    spotify_free_album_list(albums);
+}
+
+void check_album_saved_interactive(SpotifyToken *token) {
+    printf("\n=== Check if Album is Saved ===\n");
+    printf("Enter album name to search: ");
+    
+    char query[256];
+    if (!fgets(query, sizeof(query), stdin)) {
+        printf("Invalid input.\n");
+        return;
+    }
+    query[strcspn(query, "\n")] = '\0';
+    
+    SpotifyAlbumList *albums = spotify_search_albums(token, query, 10);
+    
+    if (!albums || albums->count == 0) {
+        printf("No albums found.\n");
+        if (albums) spotify_free_album_list(albums);
+        return;
+    }
+    
+    printf("\nFound albums:\n\n");
+    for (int i = 0; i < albums->count; i++) {
+        spotify_print_album(&albums->albums[i], i + 1);
+        printf("\n");
+    }
+    
+    printf("Enter album number to check (or 0 to cancel): ");
+    int choice;
+    if (scanf("%d", &choice) != 1 || choice <= 0 || choice > albums->count) {
+        spotify_free_album_list(albums);
+        getchar();
+        return;
+    }
+    getchar();
+    
+    const char *album_id = albums->albums[choice - 1].id;
+    const char *album_name = albums->albums[choice - 1].name;
+    
+    printf("Checking if '%s' is saved...\n", album_name);
+    
+    if (spotify_is_album_saved(token, album_id)) {
+        printf("✅ Album is in your library!\n");
+    } else {
+        printf("❌ Album is not in your library.\n");
+    }
+    
+    spotify_free_album_list(albums);
+}
+
+void search_albums_interactive(SpotifyToken *token) {
+    printf("\n=== Search Albums ===\n");
+    printf("Enter album name: ");
+    
+    char query[256];
+    if (!fgets(query, sizeof(query), stdin)) {
+        printf("Invalid input.\n");
+        return;
+    }
+    query[strcspn(query, "\n")] = '\0';
+    
+    SpotifyAlbumList *albums = spotify_search_albums(token, query, 10);
+    
+    if (!albums || albums->count == 0) {
+        printf("No albums found.\n");
+        if (albums) spotify_free_album_list(albums);
+        return;
+    }
+    
+    printf("\nFound %d album(s) (total: %d)\n\n", albums->count, albums->total);
+    
+    for (int i = 0; i < albums->count; i++) {
+        spotify_print_album(&albums->albums[i], i + 1);
+        printf("\n");
+    }
+    
+    spotify_free_album_list(albums);
+}
+
+void view_album_details_interactive(SpotifyToken *token) {
+    printf("\n=== View Album Details ===\n");
+    printf("Enter album name to search: ");
+    
+    char query[256];
+    if (!fgets(query, sizeof(query), stdin)) {
+        printf("Invalid input.\n");
+        return;
+    }
+    query[strcspn(query, "\n")] = '\0';
+    
+    SpotifyAlbumList *albums = spotify_search_albums(token, query, 10);
+    
+    if (!albums || albums->count == 0) {
+        printf("No albums found.\n");
+        if (albums) spotify_free_album_list(albums);
+        return;
+    }
+    
+    printf("\nFound albums:\n\n");
+    for (int i = 0; i < albums->count; i++) {
+        spotify_print_album(&albums->albums[i], i + 1);
+        printf("\n");
+    }
+    
+    printf("Enter album number to view details (or 0 to cancel): ");
+    int choice;
+    if (scanf("%d", &choice) != 1 || choice <= 0 || choice > albums->count) {
+        spotify_free_album_list(albums);
+        getchar();
+        return;
+    }
+    getchar();
+    
+    const char *album_id = albums->albums[choice - 1].id;
+    
+    SpotifyAlbumDetailed *album = spotify_get_album(token, album_id);
+    
+    if (album) {
+        spotify_print_album_detailed(album);
+        spotify_free_album_detailed(album);
+    } else {
+        printf("Failed to get album details.\n");
+    }
+    
+    spotify_free_album_list(albums);
+}
+
+void view_playlist_details_interactive(SpotifyToken *token) {
+    printf("\n=== View Playlist Details ===\n");
+    
+    SpotifyPlaylistList *playlists = spotify_get_user_playlists(token, 20, 0);
+    
+    if (!playlists || playlists->count == 0) {
+        printf("No playlists found.\n");
+        if (playlists) spotify_free_playlist_list(playlists);
+        return;
+    }
+    
+    printf("\nYour playlists:\n\n");
+    for (int i = 0; i < playlists->count; i++) {
+        spotify_print_playlist(&playlists->playlists[i], i + 1);
+        printf("\n");
+    }
+    
+    printf("Enter playlist number to view details (or 0 to cancel): ");
+    int choice;
+    if (scanf("%d", &choice) != 1 || choice <= 0 || choice > playlists->count) {
+        spotify_free_playlist_list(playlists);
+        getchar();
+        return;
+    }
+    getchar();
+    
+    const char *playlist_id = playlists->playlists[choice - 1].id;
+    
+    SpotifyPlaylistFull *playlist = spotify_get_playlist(token, playlist_id, true, 50);
+    
+    if (playlist) {
+        spotify_print_playlist_full(playlist);
+        spotify_free_playlist_full(playlist);
+    } else {
+        printf("Failed to get playlist details.\n");
+    }
+    
+    spotify_free_playlist_list(playlists);
+}
+
+void view_recently_played_interactive(SpotifyToken *token) {
+    printf("\nFetching recently played tracks...\n");
+    
+    SpotifyRecentlyPlayed *history = spotify_get_recently_played(token, 20);
+    
+    if (!history) {
+        printf("Failed to get recently played tracks.\n");
+        return;
+    }
+    
+    spotify_print_recently_played(history);
+    spotify_free_recently_played(history);
+}
+
+void view_currently_playing_interactive(SpotifyToken *token) {
+    printf("\nFetching currently playing track...\n");
+    
+    SpotifyPlayerState *state = spotify_get_currently_playing(token);
+    
+    if (!state) {
+        printf("No track currently playing.\n");
+        return;
+    }
+    
+    spotify_print_player_state(state);
+    spotify_free_player_state(state);
+}
+
+void toggle_shuffle_interactive(SpotifyToken *token) {
+    SpotifyPlayerState *state = spotify_get_player_state(token);
+    
+    if (!state) {
+        printf("No active playback.\n");
+        return;
+    }
+    
+    bool new_state = !state->shuffle_state;
+    
+    printf("Setting shuffle to %s...\n", new_state ? "ON" : "OFF");
+    
+    if (spotify_toggle_playback_shuffle(token, NULL, new_state)) {
+        printf("✅ Shuffle %s!\n", new_state ? "enabled" : "disabled");
+    } else {
+        printf("❌ Failed to toggle shuffle.\n");
+    }
+    
+    spotify_free_player_state(state);
+}
+
+void set_volume_interactive(SpotifyToken *token) {
+    printf("\n=== Set Volume ===\n");
+    printf("Enter volume (0-100): ");
+    
+    int volume;
+    if (scanf("%d", &volume) != 1 || volume < 0 || volume > 100) {
+        printf("Invalid volume. Must be between 0 and 100.\n");
+        getchar();
+        return;
+    }
+    getchar();
+    
+    printf("Setting volume to %d%%...\n", volume);
+    
+    if (spotify_set_playback_volume(token, NULL, volume)) {
+        printf("✅ Volume set to %d%%!\n", volume);
+    } else {
+        printf("❌ Failed to set volume.\n");
+    }
+}
+
+void seek_to_position_interactive(SpotifyToken *token) {
+    printf("\n=== Seek to Position ===\n");
+    
+    SpotifyPlayerState *state = spotify_get_player_state(token);
+    
+    if (!state) {
+        printf("No active playback.\n");
+        return;
+    }
+    
+    printf("Current track: %s\n", state->track_name);
+    printf("Duration: %d:%02d\n",
+           state->duration_ms / 60000,
+           (state->duration_ms / 1000) % 60);
+    printf("Current position: %d:%02d\n",
+           state->progress_ms / 60000,
+           (state->progress_ms / 1000) % 60);
+    
+    printf("\nEnter new position in seconds: ");
+    int seconds;
+    if (scanf("%d", &seconds) != 1) {
+        printf("Invalid input.\n");
+        spotify_free_player_state(state);
+        getchar();
+        return;
+    }
+    getchar();
+    
+    int position_ms = seconds * 1000;
+    
+    if (position_ms < 0 || position_ms > state->duration_ms) {
+        printf("Position out of range.\n");
+        spotify_free_player_state(state);
+        return;
+    }
+    
+    printf("Seeking to %d:%02d...\n", seconds / 60, seconds % 60);
+    
+    if (spotify_seek_to_position(token, position_ms, NULL)) {
+        printf("✅ Seeked successfully!\n");
+    } else {
+        printf("❌ Failed to seek.\n");
+    }
+    
+    spotify_free_player_state(state);
+}
+
+void view_devices_interactive(SpotifyToken *token) {
+    printf("\nFetching available devices...\n");
+    
+    int device_count = 0;
+    SpotifyDevice *devices = spotify_get_available_devices(token, &device_count);
+    
+    if (!devices || device_count == 0) {
+        printf("No devices found.\n");
+        if (devices) free(devices);
+        return;
+    }
+    
+    printf("\nFound %d device(s):\n\n", device_count);
+    
+    for (int i = 0; i < device_count; i++) {
+        spotify_print_device(&devices[i], i + 1);
+        printf("\n");
+    }
+    
+    free(devices);
+}
+
 void interactive_mode(SpotifyToken *token) {
     while (1) {
         print_menu();
-
+        
         int choice;
         if (scanf("%d", &choice) != 1) {
             printf("Invalid input.\n");
-            while (getchar() != '\n'); // clear input buffer
+            while (getchar() != '\n');
             continue;
         }
-        getchar(); // consume newline
-
+        getchar();
+        
         switch (choice) {
-            case 1: // EXIT APP
+            case 1:  // Exit
                 printf("\nGoodbye!\n");
                 return;
-            case 2:  // VIEW OPTIONS
-                users_options();
+                
+            case 2:  // View current user profile
+                view_current_user_profile(token);
                 break;
-            case 3:  // VIEW SAVED/LIKED TRACKS
+                
+            case 3:  // View saved tracks
                 view_saved_tracks(token);
                 break;
-            case 4:  // SEARCH FOR AN ARTIST FROM QUERY
+                
+            case 4:  // Remove track from library
+                remove_track_from_library_interactive(token);
+                break;
+                
+            case 5:  // Check if track is saved
+                check_track_saved_interactive(token);
+                break;
+                
+            case 6:  // View saved albums
+                view_saved_albums_interactive(token);
+                break;
+                
+            case 7:  // Save album to library
+                save_album_interactive(token);
+                break;
+                
+            case 8:  // Remove album from library
+                remove_album_interactive(token);
+                break;
+                
+            case 9:  // Check if album is saved
+                check_album_saved_interactive(token);
+                break;
+                
+            case 10:  // Search tracks
+            {
+                printf("\nEnter track name: ");
+                char query[256];
+                if (fgets(query, sizeof(query), stdin)) {
+                    query[strcspn(query, "\n")] = '\0';
+                    search_and_save(token, query);
+                }
+                break;
+            }
+                
+            case 11:  // Search artists
             {
                 printf("\nEnter artist name: ");
                 char query[256];
@@ -555,27 +1156,12 @@ void interactive_mode(SpotifyToken *token) {
                 }
                 break;
             }
-            case 5:  // SEARCH A SONG FROM QUERY
-            {
-                printf("\nEnter search query: ");
-                char query[256];
-                if (fgets(query, sizeof(query), stdin)) {
-                    query[strcspn(query, "\n")] = '\0';
-                    search_and_save(token, query);
-                }
+                
+            case 12:  // Search albums
+                search_albums_interactive(token);
                 break;
-            }
-            case 6:  // VIEW ARTIST'S TOP TRACKS
-            {
-                printf("\nEnter artist name: ");
-                char query[256];
-                if (fgets(query, sizeof(query), stdin)) {
-                    query[strcspn(query, "\n")] = '\0';
-                    search_artist_and_view_top_tracks(token, query);
-                }
-                break;
-            }
-            case 7:  // VIEW ARTIST'S ALBUMS
+                
+            case 13:  // View artist's albums
             {
                 printf("\nEnter artist name: ");
                 char query[256];
@@ -585,33 +1171,132 @@ void interactive_mode(SpotifyToken *token) {
                 }
                 break;
             }
-            case 8:  // VIEW USER'S PLAYLISTS
+                
+            case 14:  // View artist's top tracks
+            {
+                printf("\nEnter artist name: ");
+                char query[256];
+                if (fgets(query, sizeof(query), stdin)) {
+                    query[strcspn(query, "\n")] = '\0';
+                    search_artist_and_view_top_tracks(token, query);
+                }
+                break;
+            }
+                
+            case 15:  // View album details
+                view_album_details_interactive(token);
+                break;
+                
+            case 16:  // View your playlists
                 view_users_playlists(token, 20, 0);
                 break;
-            case 9:  // VIEW QUEUE
-                view_queue(token);
+                
+            case 17:  // View playlist details
+                view_playlist_details_interactive(token);
                 break;
-            case 10:  // ADD TRACK TO QUEUE
-                add_track_to_queue_interactive(token);
-                break;
-            case 11:  // ADD ARTIST TRACK TO QUEUE
-                add_artist_track_to_queue(token);
-                break;
-            case 12:  // CREATE PLAYLIST
+                
+            case 18:  // Create playlist
                 create_playlist_interactive(token);
                 break;
-            case 13:  // MANAGE PLAYLIST
+                
+            case 19:  // Edit playlist details
                 manage_playlist_interactive(token);
                 break;
-            case 14:  // ADD TRACK TO PLAYLIST
+                
+            case 20:  // Add track to playlist
                 add_track_to_playlist_interactive(token);
                 break;
-            case 15:  // REMOVE TRACK FROM PLAYLIST
+                
+            case 21:  // Remove track from playlist
                 remove_track_from_playlist_interactive(token);
                 break;
-            case 16:  // REMOVE PLAYLIST FROM USER FOLLOW 
+                
+            case 22:  // Reorder playlist tracks
+                printf("⚠️  Reorder playlist feature coming soon!\n");
+                break;
+                
+            case 23:  // Unfollow playlist
                 unfollow_playlist_interactive(token);
                 break;
+                
+            case 24:  // View player state
+            {
+                SpotifyPlayerState *state = spotify_get_player_state(token);
+                if (state) {
+                    spotify_print_player_state(state);
+                    spotify_free_player_state(state);
+                }
+                break;
+            }
+                
+            case 25:  // View currently playing
+                view_currently_playing_interactive(token);
+                break;
+                
+            case 26:  // View recently played
+                view_recently_played_interactive(token);
+                break;
+                
+            case 27:  // Play/Pause toggle
+                spotify_toggle_playback(token);
+                break;
+                
+            case 28:  // Next track
+                if (spotify_skip_next_playback(token, NULL)) {
+                    printf("⏭️  Skipped to next track!\n");
+                } else {
+                    printf("❌ Failed to skip.\n");
+                }
+                break;
+                
+            case 29:  // Previous track
+                if (spotify_skip_previous_playback(token, NULL)) {
+                    printf("⏮️  Skipped to previous track!\n");
+                } else {
+                    printf("❌ Failed to skip.\n");
+                }
+                break;
+                
+            case 30:  // Toggle shuffle
+                toggle_shuffle_interactive(token);
+                break;
+                
+            case 31:  // Cycle repeat mode
+                if (spotify_toggle_playback_repeat(token, NULL)) {
+                    printf("🔁 Repeat mode changed!\n");
+                } else {
+                    printf("❌ Failed to change repeat mode.\n");
+                }
+                break;
+                
+            case 32:  // Set volume
+                set_volume_interactive(token);
+                break;
+                
+            case 33:  // Seek to position
+                seek_to_position_interactive(token);
+                break;
+                
+            case 34:  // View available devices
+                view_devices_interactive(token);
+                break;
+                
+            case 35:  // Transfer playback to device
+                view_and_transfer_devices(token);
+                break;
+                
+            case 36:  // View queue
+                view_queue(token);
+                break;
+                
+            case 37:  // Add track to queue
+                add_track_to_queue_interactive(token);
+                break;
+                
+            case 38:  // Add artist track to queue
+                add_artist_track_to_queue(token);
+                break;
+                
             default:
                 printf("Invalid option. Please try again.\n");
         }
