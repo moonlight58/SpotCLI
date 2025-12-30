@@ -143,22 +143,32 @@ void spotify_print_player_state(SpotifyPlayerState *state) {
         printf("No playback state available\n");
         return;
     }
+    
+    const int BOX_WIDTH = 64;  // Total width including borders
+    const int CONTENT_WIDTH = BOX_WIDTH - 4;  // Width minus "║ " and " ║"
 
     printf("╔════════════════════════════════════════════════════════════════╗\n");
-    printf("║                      SPOTIFY PLAYER STATE                      ║\n");
+    printf("║%-64s║\n", "                      SPOTIFY PLAYER STATE");
     printf("╠════════════════════════════════════════════════════════════════╣\n");
 
-    // Track info
-    printf("║ Track: %s\n", state->track_name);
-    printf("║ Artist: %s\n", state->artist_name);
-    printf("║ Album: %s\n", state->album_name);
+    // Track info - truncate if too long
+    char track_line[128];
+    snprintf(track_line, sizeof(track_line), " Track: %.48s", state->track_name);
+    printf("║%-64s║\n", track_line);
+
+    snprintf(track_line, sizeof(track_line), " Artist: %.47s", state->artist_name);
+    printf("║%-64s║\n", track_line);
+
+    snprintf(track_line, sizeof(track_line), " Album: %.48s", state->album_name);
+    printf("║%-64s║\n", track_line);
 
     // Progress
     int progress_sec = state->progress_ms / 1000;
     int duration_sec = state->duration_ms / 1000;
-    printf("║ Progress: %d:%02d / %d:%02d\n",
-           progress_sec / 60, progress_sec % 60,
-           duration_sec / 60, duration_sec % 60);
+    snprintf(track_line, sizeof(track_line), " Progress: %d:%02d / %d:%02d",
+             progress_sec / 60, progress_sec % 60,
+             duration_sec / 60, duration_sec % 60);
+    printf("║%-64s║\n", track_line);
 
     // Progress bar
     int bar_width = 50;
@@ -168,23 +178,39 @@ void spotify_print_player_state(SpotifyPlayerState *state) {
     for (int i = 0; i < bar_width; i++) {
         printf(i < filled ? "#" : ".");
     }
-    printf("]\n");
+    printf("]%-11s║\n", "");
 
     // Playback state
-    printf("║ Status: %s\n", state->is_playing ? "▶ Playing" : "⏸ Paused");
-    printf("║ Shuffle: %s\n", state->shuffle_state ? "On" : "Off");
-    printf("║ Repeat: %s\n", state->repeat_state);
+    snprintf(track_line, sizeof(track_line), " Status: %s", 
+             state->is_playing ? "▶ Playing" : "⏸ Paused");
+    printf("║%-66s║\n", track_line);
+
+    snprintf(track_line, sizeof(track_line), " Shuffle: %s", 
+             state->shuffle_state ? "On" : "Off");
+    printf("║%-64s║\n", track_line);
+
+    snprintf(track_line, sizeof(track_line), " Repeat: %s", state->repeat_state);
+    printf("║%-64s║\n", track_line);
 
     // Context
     if (strlen(state->context_type) > 0) {
-        printf("║ Context: %s\n", state->context_type);
+        snprintf(track_line, sizeof(track_line), " Context: %s", state->context_type);
+        printf("║%-64s║\n", track_line);
     }
 
     // Device info
     printf("╠════════════════════════════════════════════════════════════════╣\n");
-    printf("║ Device: %s (%s)\n", state->device.device_name, state->device.device_type);
-    printf("║ Volume: %d%%\n", state->device.volume_percent);
-    printf("║ Active: %s\n", state->device.is_active ? "Yes" : "No");
+    
+    snprintf(track_line, sizeof(track_line), " Device: %s (%s)", 
+             state->device.device_name, state->device.device_type);
+    printf("║%-64s║\n", track_line);
+
+    snprintf(track_line, sizeof(track_line), " Volume: %d%%", state->device.volume_percent);
+    printf("║%-64s║\n", track_line);
+
+    snprintf(track_line, sizeof(track_line), " Active: %s", 
+             state->device.is_active ? "Yes" : "No");
+    printf("║%-64s║\n", track_line);
 
     printf("╚════════════════════════════════════════════════════════════════╝\n");
 }

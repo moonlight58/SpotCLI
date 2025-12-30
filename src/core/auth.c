@@ -143,10 +143,10 @@ static bool spotify_token_is_expired(SpotifyToken *token) {
     time_t remaining = token->expires_in - elapsed;
 
     // Refresh if less than 5 minutes remaining
-    printf("Checking if token expired: elapsed=%ld, remaining=%ld\n", elapsed, remaining);
+    // printf("Checking if token expired: elapsed=%ld, remaining=%ld\n", elapsed, remaining);
 
     bool is_expired = (now - token->obtained_at) >= (token->expires_in - 300);
-    printf("Token expired: %s\n", is_expired ? "yes" : "no");
+    // printf("Token expired: %s\n", is_expired ? "yes" : "no");
 
     return is_expired;
 }
