@@ -50,7 +50,7 @@ brew install curl json-c
 
 ```bash
 # Clone or download the repository
-git clone https://github.com/yourusername/spotCLI.git
+git clone https://github.com/moonlight58/spotCLI.git
 cd spotCLI
 
 # Build using Make
